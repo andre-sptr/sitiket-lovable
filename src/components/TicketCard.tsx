@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StatusBadge, ComplianceBadge, TTRBadge } from '@/components/StatusBadge';
 import { formatDateShort, generateGoogleMapsLink } from '@/lib/formatters';
+import { getSettings, getTTRStatus, isDueSoon as checkIsDueSoon } from '@/hooks/useSettings';
 import { 
   MapPin, 
   Clock, 
@@ -23,8 +24,10 @@ interface TicketCardProps {
 
 export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onCopyWhatsApp, compact = false }) => {
   const navigate = useNavigate();
-  const isOverdue = ticket.sisaTtrHours <= 0 && ticket.status !== 'CLOSED';
-  const isDueSoon = ticket.sisaTtrHours > 0 && ticket.sisaTtrHours <= 2 && ticket.status !== 'CLOSED';
+  const settings = getSettings();
+  const ttrStatus = getTTRStatus(ticket.sisaTtrHours, settings.ttrThresholds);
+  const isOverdue = ttrStatus === 'overdue' && ticket.status !== 'CLOSED';
+  const isDueSoon = checkIsDueSoon(ticket.sisaTtrHours, settings.ttrThresholds) && ticket.status !== 'CLOSED';
   const isUnassigned = !ticket.assignedTo && ticket.status === 'OPEN';
 
   const handleClick = () => {

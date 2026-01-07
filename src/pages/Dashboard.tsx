@@ -8,6 +8,7 @@ import {
   mockDashboardStats 
 } from '@/lib/mockData';
 import { generateWhatsAppMessage } from '@/lib/formatters';
+import { getSettings, isDueSoon as checkIsDueSoon } from '@/hooks/useSettings';
 import { Ticket } from '@/types/ticket';
 import { 
   Ticket as TicketIcon, 
@@ -28,6 +29,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const todayTickets = getTodayTickets();
   const stats = mockDashboardStats;
+  const settings = getSettings();
 
   // Sort: overdue first, then by remaining TTR
   const sortedTickets = [...todayTickets].sort((a, b) => {
@@ -37,7 +39,9 @@ const Dashboard = () => {
   });
 
   const overdueTickets = todayTickets.filter(t => t.sisaTtrHours < 0 && t.status !== 'CLOSED');
-  const dueSoonTickets = todayTickets.filter(t => t.sisaTtrHours > 0 && t.sisaTtrHours <= 2 && t.status !== 'CLOSED');
+  const dueSoonTickets = todayTickets.filter(t => 
+    checkIsDueSoon(t.sisaTtrHours, settings.ttrThresholds) && t.status !== 'CLOSED'
+  );
   const unassignedTickets = todayTickets.filter(t => !t.assignedTo && t.status === 'OPEN');
 
   const handleCopyWhatsApp = (ticket: Ticket) => {
