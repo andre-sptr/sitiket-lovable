@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { TicketStatus, TTRCompliance } from '@/types/ticket';
 import { getStatusLabel } from '@/lib/formatters';
+import { getSettings, getTTRStatus } from '@/hooks/useSettings';
 import { 
   Clock, 
   UserCheck, 
@@ -80,13 +81,15 @@ interface TTRBadgeProps {
 }
 
 export const TTRBadge: React.FC<TTRBadgeProps> = ({ hours, size = 'default' }) => {
-  let variant: 'success' | 'warning' | 'critical' = 'success';
+  const settings = getSettings();
+  const ttrStatus = getTTRStatus(hours, settings.ttrThresholds);
   
-  if (hours <= 0) {
-    variant = 'critical';
-  } else if (hours <= 2) {
-    variant = 'warning';
-  }
+  const variantMap: Record<string, 'success' | 'warning' | 'critical'> = {
+    safe: 'success',
+    warning: 'warning',
+    critical: 'critical',
+    overdue: 'critical',
+  };
 
   const formatHours = (h: number) => {
     const absH = Math.abs(h);
@@ -98,11 +101,12 @@ export const TTRBadge: React.FC<TTRBadgeProps> = ({ hours, size = 'default' }) =
 
   return (
     <Badge 
-      variant={variant}
-      className={`font-mono gap-1 ${size === 'sm' ? 'text-[10px] px-2 py-0.5' : ''}`}
+      variant={variantMap[ttrStatus]}
+      className={`font-mono gap-1 ${size === 'sm' ? 'text-[10px] px-2 py-0.5' : ''} ${ttrStatus === 'overdue' ? 'animate-pulse' : ''}`}
     >
       <Clock className="w-3 h-3" />
       {formatHours(hours)}
+      {ttrStatus === 'overdue' && <span className="ml-1">OVERDUE</span>}
     </Badge>
   );
 };
