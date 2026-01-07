@@ -36,6 +36,7 @@ const adminNavItems = [
   { path: '/import', label: 'Import Tiket', icon: FileUp },
   { path: '/reports', label: 'Laporan', icon: BarChart3 },
   { path: '/users', label: 'Pengguna', icon: Users },
+  { path: '/settings', label: 'Pengaturan', icon: Settings },
 ];
 
 const taNavItems = [

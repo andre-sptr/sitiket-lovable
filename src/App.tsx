@@ -12,6 +12,7 @@ import ImportTicket from "./pages/ImportTicket";
 import MyTickets from "./pages/MyTickets";
 import Reports from "./pages/Reports";
 import UserManagement from "./pages/UserManagement";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const AppRoutes = () => {
       <Route path="/my-tickets" element={<ProtectedRoute><MyTickets /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
       <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>
