@@ -125,6 +125,10 @@ const TicketDetail = () => {
 
         {/* Quick Actions */}
         <div className="flex flex-wrap gap-2">
+          <Button size="sm" className="gap-2" onClick={() => navigate(`/ticket/${id}/update`)}>
+            <FileText className="w-4 h-4" />
+            Update Tiket
+          </Button>
           <Button variant="whatsapp" size="sm" className="gap-2" onClick={handleCopyShareMessage}>
             <Copy className="w-4 h-4" />
             Copy Pesan WA
