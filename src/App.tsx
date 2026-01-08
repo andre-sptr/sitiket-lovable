@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import AllTickets from "./pages/AllTickets";
 import TicketDetail from "./pages/TicketDetail";
 import ImportTicket from "./pages/ImportTicket";
+import UpdateTicket from "./pages/UpdateTicket";
 import MyTickets from "./pages/MyTickets";
 import Reports from "./pages/Reports";
 import UserManagement from "./pages/UserManagement";
@@ -38,6 +39,7 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/tickets" element={<ProtectedRoute><AllTickets /></ProtectedRoute>} />
       <Route path="/ticket/:id" element={<ProtectedRoute><TicketDetail /></ProtectedRoute>} />
+      <Route path="/ticket/:id/update" element={<ProtectedRoute><UpdateTicket /></ProtectedRoute>} />
       <Route path="/import" element={<ProtectedRoute><ImportTicket /></ProtectedRoute>} />
       <Route path="/my-tickets" element={<ProtectedRoute><MyTickets /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
