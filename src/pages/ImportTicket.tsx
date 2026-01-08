@@ -1,453 +1,383 @@
 import { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { StatusBadge } from '@/components/StatusBadge';
-import { Ticket } from '@/types/ticket';
-import { 
-  FileUp, 
-  AlertCircle, 
-  CheckCircle2, 
-  Loader2,
-  ChevronDown,
-  ChevronUp,
-  Trash2,
-  Save
-} from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Save, Plus, Trash2, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 
-interface ParsedTicket {
-  id: string;
-  incNumbers: string[];
-  siteCode: string;
-  siteName: string;
+// Dropdown options - Admin can modify these later
+const DROPDOWN_OPTIONS = {
+  hsa: ['MIS', 'SLJ', 'TBH', 'DUM', 'PKU', 'BKN'],
+  sto: ['MIS', 'SLJ', 'TBH', 'DUM', 'PKU', 'BKN'],
+  odc: ['MIS', 'SLJ', 'TBH', 'DUM', 'PKU', 'BKN'],
+  stakeHolder: ['TLKM', 'OTHER'],
+  jenisPelanggan: ['TSEL', 'ISAT', 'XL', 'OTHER'],
+  kategori: ['CNQ', 'MINOR [8]', 'MINOR [12]', 'MINOR [24]', 'MAJOR', 'CRITICAL', 'LOW [24]'],
+  losNonLos: ['LOS', 'NON LOS', 'UNSPEC'],
+  statusTiket: ['OPEN', 'PENDING', 'ONPROGRESS', 'CLOSED'],
+  compliance: ['COMPLY', 'NOT COMPLY'],
+  permanenTemporer: ['PERMANEN', 'TEMPORER'],
+  classSite: ['Platinum', 'Gold', 'Silver', 'Bronze'],
+  tim: ['Tim A', 'Tim B', 'Selat Panjang'],
+};
+
+interface TicketFormData {
+  hsa: string;
+  sto: string;
+  odc: string;
+  stakeHolder: string;
+  jenisPelanggan: string;
   kategori: string;
-  lokasiText: string;
-  latitude?: number;
-  longitude?: number;
-  jarakKmRange?: string;
-  ttrCompliance: 'COMPLY' | 'NOT COMPLY';
-  jamOpen: Date;
-  ttrTargetHours: number;
-  sisaTtrHours: number;
-  status: Ticket['status'];
-  teknisiList?: string[];
-  rawText: string;
-  parseWarnings: string[];
-  isValid: boolean;
+  tiket: string;
+  tiketTacc: string;
+  summary: string;
+  idPelanggan: string;
+  namaPelanggan: string;
+  datek: string;
+  losNonLos: string;
+  statusTiket: string;
+  indukGamas: string;
+  kjd: string;
+  reportDate: string;
+  closedDate: string;
+  ttrTarget: string;
+  ttrEnd: string;
+  ttrSisa: string;
+  compliance: string;
+  penyebabNotComply: string;
+  segmenTerganggu: string;
+  penyebabGangguan: string;
+  perbaikanGangguan: string;
+  statusAlatBerat: string;
+  progresSaatIni: string;
+  teknisi1: string;
+  teknisi2: string;
+  teknisi3: string;
+  teknisi4: string;
+  permanenTemporer: string;
+  koordinat: string;
+  siteImpact: string;
+  classSite: string;
+  tim: string;
+  histori6Bulan: string;
+  kendala: string;
+  tiketEksternal: string;
 }
+
+const emptyForm: TicketFormData = {
+  hsa: '',
+  sto: '',
+  odc: '',
+  stakeHolder: '',
+  jenisPelanggan: '',
+  kategori: '',
+  tiket: '',
+  tiketTacc: '',
+  summary: '',
+  idPelanggan: '',
+  namaPelanggan: '',
+  datek: '',
+  losNonLos: '',
+  statusTiket: '',
+  indukGamas: '',
+  kjd: '',
+  reportDate: '',
+  closedDate: '',
+  ttrTarget: '',
+  ttrEnd: '',
+  ttrSisa: '',
+  compliance: '',
+  penyebabNotComply: '',
+  segmenTerganggu: '',
+  penyebabGangguan: '',
+  perbaikanGangguan: '',
+  statusAlatBerat: '',
+  progresSaatIni: '',
+  teknisi1: '',
+  teknisi2: '',
+  teknisi3: '',
+  teknisi4: '',
+  permanenTemporer: '',
+  koordinat: '',
+  siteImpact: '',
+  classSite: '',
+  tim: '',
+  histori6Bulan: '',
+  kendala: '',
+  tiketEksternal: '',
+};
 
 const ImportTicket = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [rawText, setRawText] = useState('');
-  const [isParsing, setIsParsing] = useState(false);
-  const [parsedTickets, setParsedTickets] = useState<ParsedTicket[]>([]);
-  const [expandedTickets, setExpandedTickets] = useState<string[]>([]);
+  const [formData, setFormData] = useState<TicketFormData>(emptyForm);
 
-  const parseTicketText = (text: string): ParsedTicket[] => {
-    const tickets: ParsedTicket[] = [];
-    
-    // Split by numbered patterns or TSEL delimiter
-    const ticketBlocks = text.split(/(?=\d+\.\s*TSEL\s*\|)|(?=TSEL\s*\|)/g)
-      .filter(block => 
-        block.trim().length > 0 && /TSEL\s*\|/i.test(block)
-      );
-
-    ticketBlocks.forEach((block, index) => {
-      const warnings: string[] = [];
-      let isValid = true;
-
-      // Extract INC number(s)
-      const incMatch = block.match(/INC\d+/g);
-      const incNumbers = incMatch || [];
-      if (incNumbers.length === 0) {
-        warnings.push('INC number tidak ditemukan');
-        isValid = false;
-      }
-
-      // Extract site code (pattern like PPN555, SSI278)
-      const siteCodeMatch = block.match(/\b([A-Z]{2,4}\d{2,4})\b/);
-      const siteCode = siteCodeMatch ? siteCodeMatch[1] : 'UNKNOWN';
-      if (siteCode === 'UNKNOWN') {
-        warnings.push('Site code tidak ditemukan');
-      }
-
-      // Extract site name (after site code, before next delimiter)
-      const siteNameMatch = block.match(new RegExp(`${siteCode}\\s*[-–]\\s*([A-Z_\\s]+)`, 'i'));
-      const siteName = siteNameMatch ? siteNameMatch[1].trim().replace(/_/g, ' ') : 'Unknown Site';
-
-      // Extract kategori
-      const kategoriMatch = block.match(/KATEGORI\s*:\s*([^\n]+)/i) || 
-                           block.match(/(CNQ|MINOR\s*\[\d+\]|MAJOR|CRITICAL)/i);
-      const kategori = kategoriMatch ? kategoriMatch[1].trim() : 'Unknown';
-
-      // Extract lokasi
-      const lokasiMatch = block.match(/LOKASI\s*:\s*([^(]+)/i);
-      const lokasiText = lokasiMatch ? lokasiMatch[1].trim() : 'Unknown';
-
-      // Extract coordinates
-      const coordMatch = block.match(/\((-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\)/);
-      const latitude = coordMatch ? parseFloat(coordMatch[1]) : undefined;
-      const longitude = coordMatch ? parseFloat(coordMatch[2]) : undefined;
-
-      // Extract jarak
-      const jarakMatch = block.match(/JARAK\s*:\s*([^\n]+)/i);
-      const jarakKmRange = jarakMatch ? jarakMatch[1].trim() : undefined;
-
-      // Extract TTR compliance
-      const complianceMatch = block.match(/TTR\s*COMPLIENCE\s*:\s*(COMPLY|NOT\s*COMPLY)/i);
-      const ttrCompliance: 'COMPLY' | 'NOT COMPLY' = 
-        complianceMatch && complianceMatch[1].includes('NOT') ? 'NOT COMPLY' : 'COMPLY';
-
-      // Extract jam open
-      const jamOpenMatch = block.match(/JAM\s*OPEN\s*:\s*(\d{1,2}[:\-]\d{2})/i);
-      const now = new Date();
-      let jamOpen = now;
-      if (jamOpenMatch) {
-        const [hours, mins] = jamOpenMatch[1].split(/[:\-]/).map(Number);
-        jamOpen = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, mins);
-      }
-
-      // Extract TTR target
-      const ttrMatch = block.match(/TTR\s*:\s*(\d+)/i);
-      const ttrTargetHours = ttrMatch ? parseInt(ttrMatch[1]) : 8;
-
-      // Extract sisa TTR
-      const sisaMatch = block.match(/SISA\s*TTR\s*:\s*(-?\d+\.?\d*)/i);
-      const sisaTtrHours = sisaMatch ? parseFloat(sisaMatch[1]) : ttrTargetHours;
-
-      // Extract status
-      const statusMatch = block.match(/STATUS\s*TIKET\s*:\s*([^\n]+)/i);
-      let status: Ticket['status'] = 'OPEN';
-      if (statusMatch) {
-        const statusText = statusMatch[1].toUpperCase();
-        if (statusText.includes('CLOSE')) status = 'CLOSED';
-        else if (statusText.includes('PROGRESS')) status = 'ONPROGRESS';
-        else if (statusText.includes('TEMPORARY')) status = 'TEMPORARY';
-      }
-
-      // Extract teknisi
-      const teknisiMatch = block.match(/TEKNISI\s*:\s*([^\n]+)/i);
-      const teknisiList = teknisiMatch 
-        ? teknisiMatch[1].split(/[,;]/).map(t => t.trim()).filter(Boolean)
-        : undefined;
-
-      tickets.push({
-        id: `import-${Date.now()}-${index}`,
-        incNumbers,
-        siteCode,
-        siteName,
-        kategori,
-        lokasiText,
-        latitude,
-        longitude,
-        jarakKmRange,
-        ttrCompliance,
-        jamOpen,
-        ttrTargetHours,
-        sisaTtrHours,
-        status,
-        teknisiList,
-        rawText: block.trim(),
-        parseWarnings: warnings,
-        isValid,
-      });
-    });
-
-    return tickets;
+  const updateField = (field: keyof TicketFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleParse = () => {
-    if (!rawText.trim()) {
+  const handleReset = () => {
+    setFormData(emptyForm);
+  };
+
+  const handleSubmit = () => {
+    // Validate required fields
+    if (!formData.tiket) {
       toast({
         title: "Error",
-        description: "Masukkan teks tiket terlebih dahulu",
+        description: "Nomor Tiket (INC) wajib diisi",
         variant: "destructive",
       });
       return;
     }
 
-    setIsParsing(true);
-    
-    // Simulate parsing delay
-    setTimeout(() => {
-      const parsed = parseTicketText(rawText);
-      setParsedTickets(parsed);
-      setExpandedTickets(parsed.map(t => t.id));
-      setIsParsing(false);
-
-      if (parsed.length === 0) {
-        toast({
-          title: "Parsing Gagal",
-          description: "Tidak dapat menemukan tiket dalam teks",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Parsing Berhasil",
-          description: `Ditemukan ${parsed.length} tiket`,
-        });
-      }
-    }, 500);
-  };
-
-  const handleRemoveTicket = (id: string) => {
-    setParsedTickets(prev => prev.filter(t => t.id !== id));
-  };
-
-  const handleSaveAll = () => {
-    const validTickets = parsedTickets.filter(t => t.isValid);
-    if (validTickets.length === 0) {
-      toast({
-        title: "Error",
-        description: "Tidak ada tiket valid untuk disimpan",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    // TODO: Save to database
     toast({
-      title: "Tiket Disimpan",
-      description: `${validTickets.length} tiket berhasil diimport`,
+      title: "Tiket Berhasil Disimpan",
+      description: `Tiket ${formData.tiket} telah ditambahkan`,
     });
     
     navigate('/tickets');
   };
 
-  const toggleExpanded = (id: string) => {
-    setExpandedTickets(prev => 
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
-  };
+  const SelectField = ({ 
+    label, 
+    field, 
+    options,
+    placeholder = "Pilih..."
+  }: { 
+    label: string; 
+    field: keyof TicketFormData; 
+    options: string[];
+    placeholder?: string;
+  }) => (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Select value={formData[field]} onValueChange={(v) => updateField(field, v)}>
+        <SelectTrigger className="h-9">
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent className="bg-background border shadow-lg z-50">
+          {options.map(opt => (
+            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 
-  const sampleText = `1. TSEL | INC44642401 PPN555 - SIMPANG_KAMBING TSEL_CNQ_METRO_PPN555_SIMPANG_KAMBING
-KATEGORI : CNQ
-LOKASI : KANDIS (1.055839722, 100.79362)
-JARAK : 70-100km
-TTR COMPLIENCE : COMPLY
-JAM OPEN : 08:00
-TTR : 8
-MAX JAM CLOSE : 16:00
-SISA TTR : 4.5
-TEKNISI : Budi Santoso, Cahyo Pratama
-STATUS TIKET : ONPROGRESS
-
-Timely Report :
-1. Jam 08:30 - Tiket diterima, TA on the way
-2. Jam 09:15 - On site, pengecekan perangkat
-3. Jam 10:00 - Ditemukan FO putus, proses perbaikan`;
+  const InputField = ({ 
+    label, 
+    field, 
+    placeholder = "",
+    type = "text"
+  }: { 
+    label: string; 
+    field: keyof TicketFormData; 
+    placeholder?: string;
+    type?: string;
+  }) => (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Input
+        type={type}
+        value={formData[field]}
+        onChange={(e) => updateField(field, e.target.value)}
+        placeholder={placeholder}
+        className="h-9"
+      />
+    </div>
+  );
 
   return (
     <Layout>
-      <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Import Tiket</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Paste teks tiket untuk di-import ke sistem
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Input Tiket Baru</h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              Masukkan data tiket gangguan
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleReset} className="gap-2">
+              <RotateCcw className="w-4 h-4" />
+              Reset
+            </Button>
+            <Button onClick={handleSubmit} className="gap-2">
+              <Save className="w-4 h-4" />
+              Simpan
+            </Button>
+          </div>
         </div>
 
-        {/* Input Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <FileUp className="w-5 h-5" />
-              Paste Teks Tiket
-            </CardTitle>
-            <CardDescription>
-              Tempel teks tiket mentah. Sistem akan otomatis parsing INC, site, TTR, dan timeline.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Textarea
-              placeholder="Paste teks tiket di sini..."
-              value={rawText}
-              onChange={(e) => setRawText(e.target.value)}
-              className="min-h-[200px] font-mono text-sm"
-            />
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button 
-                onClick={handleParse} 
-                disabled={isParsing || !rawText.trim()}
-                className="flex-1 sm:flex-none"
-              >
-                {isParsing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Parsing...
-                  </>
-                ) : (
-                  <>
-                    <FileUp className="w-4 h-4 mr-2" />
-                    Parse Tiket
-                  </>
-                )}
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => setRawText(sampleText)}
-                className="flex-1 sm:flex-none"
-              >
-                Lihat Contoh
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Parsed Results */}
-        {parsedTickets.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">
-                Hasil Parsing ({parsedTickets.length} tiket)
-              </h2>
-              <div className="flex items-center gap-2">
-                <Badge variant="success" className="gap-1">
-                  <CheckCircle2 className="w-3 h-3" />
-                  {parsedTickets.filter(t => t.isValid).length} valid
-                </Badge>
-                {parsedTickets.some(t => !t.isValid) && (
-                  <Badge variant="warning" className="gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    {parsedTickets.filter(t => !t.isValid).length} perlu cek
-                  </Badge>
-                )}
+        {/* Form Sections */}
+        <div className="grid gap-6">
+          {/* Section 1: Lokasi & Kategori */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Lokasi & Kategori</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <SelectField label="HSA" field="hsa" options={DROPDOWN_OPTIONS.hsa} />
+                <SelectField label="STO" field="sto" options={DROPDOWN_OPTIONS.sto} />
+                <SelectField label="ODC" field="odc" options={DROPDOWN_OPTIONS.odc} />
+                <SelectField label="Stake Holder" field="stakeHolder" options={DROPDOWN_OPTIONS.stakeHolder} />
+                <SelectField label="Jenis Pelanggan" field="jenisPelanggan" options={DROPDOWN_OPTIONS.jenisPelanggan} />
+                <SelectField label="Kategori Tiket" field="kategori" options={DROPDOWN_OPTIONS.kategori} />
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {parsedTickets.map((ticket) => (
-              <Collapsible 
-                key={ticket.id}
-                open={expandedTickets.includes(ticket.id)}
-                onOpenChange={() => toggleExpanded(ticket.id)}
-              >
-                <Card className={ticket.isValid ? '' : 'border-amber-300 bg-amber-50/50'}>
-                  <CollapsibleTrigger className="w-full">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 text-left">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className="font-mono text-sm">
-                              {ticket.incNumbers.join(', ') || 'No INC'}
-                            </span>
-                            <StatusBadge status={ticket.status} size="sm" />
-                            {!ticket.isValid && (
-                              <Badge variant="warning" className="gap-1">
-                                <AlertCircle className="w-3 h-3" />
-                                Perlu cek
-                              </Badge>
-                            )}
-                          </div>
-                          <CardTitle className="text-base">
-                            {ticket.siteCode} - {ticket.siteName}
-                          </CardTitle>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveTicket(ticket.id);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4 text-muted-foreground" />
-                          </Button>
-                          {expandedTickets.includes(ticket.id) ? (
-                            <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <CardContent className="pt-0">
-                      {ticket.parseWarnings.length > 0 && (
-                        <div className="mb-4 p-3 bg-amber-100 rounded-lg">
-                          <p className="text-sm font-medium text-amber-800 mb-1">
-                            Warning:
-                          </p>
-                          <ul className="text-sm text-amber-700 list-disc list-inside">
-                            {ticket.parseWarnings.map((warning, i) => (
-                              <li key={i}>{warning}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Kategori:</span>
-                          <span className="ml-2">{ticket.kategori}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Lokasi:</span>
-                          <span className="ml-2">{ticket.lokasiText}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Jarak:</span>
-                          <span className="ml-2">{ticket.jarakKmRange || '-'}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">TTR:</span>
-                          <span className="ml-2">{ticket.ttrTargetHours}h (sisa: {ticket.sisaTtrHours}h)</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Compliance:</span>
-                          <span className="ml-2">{ticket.ttrCompliance}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Teknisi:</span>
-                          <span className="ml-2">{ticket.teknisiList?.join(', ') || '-'}</span>
-                        </div>
-                        {ticket.latitude && ticket.longitude && (
-                          <div className="col-span-2">
-                            <span className="text-muted-foreground">Koordinat:</span>
-                            <span className="ml-2 font-mono text-xs">
-                              {ticket.latitude}, {ticket.longitude}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+          {/* Section 2: Info Tiket */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Informasi Tiket</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <InputField label="No. Tiket (INC)" field="tiket" placeholder="INC44646411" />
+                <InputField label="Tiket TACC" field="tiketTacc" placeholder="Optional" />
+                <InputField label="Induk GAMAS" field="indukGamas" placeholder="INC..." />
+                <InputField label="KJD" field="kjd" placeholder="KJD25199" />
+              </div>
+              <div className="mt-4">
+                <Label className="text-xs font-medium text-muted-foreground">Summary</Label>
+                <Textarea
+                  value={formData.summary}
+                  onChange={(e) => updateField('summary', e.target.value)}
+                  placeholder="TSEL_METRO_BLS153_UTAMA_TENAN..."
+                  className="mt-1.5 min-h-[60px]"
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-                      <div className="mt-4 pt-4 border-t">
-                        <p className="text-xs text-muted-foreground mb-2">Raw Text:</p>
-                        <pre className="text-xs bg-muted p-2 rounded overflow-x-auto whitespace-pre-wrap">
-                          {ticket.rawText.slice(0, 300)}
-                          {ticket.rawText.length > 300 && '...'}
-                        </pre>
-                      </div>
-                    </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
-            ))}
+          {/* Section 3: Info Pelanggan & Site */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Pelanggan & Site</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <InputField label="ID Pelanggan / Site" field="idPelanggan" placeholder="BLS153" />
+                <InputField label="Nama Pelanggan / Site" field="namaPelanggan" placeholder="UTAMA_TENAN" />
+                <InputField label="DATEK" field="datek" placeholder="SLJ/GPON00-D1-SLJ-3" />
+                <SelectField label="LOS / Non LOS" field="losNonLos" options={DROPDOWN_OPTIONS.losNonLos} />
+                <InputField label="Site Impact" field="siteImpact" placeholder="PPN555" />
+                <SelectField label="Class Site" field="classSite" options={DROPDOWN_OPTIONS.classSite} />
+                <InputField label="Koordinat" field="koordinat" placeholder="-0.123456, 101.123456" />
+                <InputField label="Histori 6 Bulan" field="histori6Bulan" placeholder="10x" />
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Save Button */}
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setParsedTickets([])}>
-                Batal
-              </Button>
-              <Button onClick={handleSaveAll} className="gap-2">
-                <Save className="w-4 h-4" />
-                Simpan {parsedTickets.filter(t => t.isValid).length} Tiket
-              </Button>
-            </div>
-          </div>
-        )}
+          {/* Section 4: Status & TTR */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Status & TTR</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <SelectField label="Status Tiket" field="statusTiket" options={DROPDOWN_OPTIONS.statusTiket} />
+                <InputField label="Report Date" field="reportDate" placeholder="DD/MM/YYYY HH:MM" />
+                <InputField label="Closed Date" field="closedDate" placeholder="DD/MM/YYYY HH:MM" />
+                <InputField label="TTR Target" field="ttrTarget" placeholder="24" />
+                <InputField label="TTR End" field="ttrEnd" placeholder="" />
+                <InputField label="TTR Sisa" field="ttrSisa" placeholder="" />
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                <SelectField label="Compliance" field="compliance" options={DROPDOWN_OPTIONS.compliance} />
+                <div className="md:col-span-2">
+                  <InputField label="Penyebab Not Comply" field="penyebabNotComply" placeholder="" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 5: Gangguan & Perbaikan */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Gangguan & Perbaikan</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputField label="Segmen Terganggu" field="segmenTerganggu" placeholder="" />
+                <InputField label="Penyebab Gangguan" field="penyebabGangguan" placeholder="" />
+                <InputField label="Perbaikan Gangguan" field="perbaikanGangguan" placeholder="" />
+                <InputField label="Status Alat Berat" field="statusAlatBerat" placeholder="" />
+              </div>
+              <div className="mt-4">
+                <Label className="text-xs font-medium text-muted-foreground">Progres Saat Ini</Label>
+                <Textarea
+                  value={formData.progresSaatIni}
+                  onChange={(e) => updateField('progresSaatIni', e.target.value)}
+                  placeholder="kabel sudah tertimbun batu2 di jembatan..."
+                  className="mt-1.5 min-h-[60px]"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 6: Teknisi & Tim */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Teknisi & Tim</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <InputField label="Teknisi 1" field="teknisi1" placeholder="22010054-DIMAS RIO" />
+                <InputField label="Teknisi 2" field="teknisi2" placeholder="" />
+                <InputField label="Teknisi 3" field="teknisi3" placeholder="" />
+                <InputField label="Teknisi 4" field="teknisi4" placeholder="" />
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                <SelectField label="Permanen / Temporer" field="permanenTemporer" options={DROPDOWN_OPTIONS.permanenTemporer} />
+                <SelectField label="Tim" field="tim" options={DROPDOWN_OPTIONS.tim} />
+                <InputField label="Tiket Eksternal" field="tiketEksternal" placeholder="" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 7: Kendala */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Kendala</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                value={formData.kendala}
+                onChange={(e) => updateField('kendala', e.target.value)}
+                placeholder="Jelaskan kendala yang dihadapi..."
+                className="min-h-[80px]"
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Bottom Actions */}
+        <div className="flex justify-end gap-2 pb-6">
+          <Button variant="outline" onClick={handleReset}>
+            Reset Form
+          </Button>
+          <Button onClick={handleSubmit} className="gap-2">
+            <Save className="w-4 h-4" />
+            Simpan Tiket
+          </Button>
+        </div>
       </div>
     </Layout>
   );
