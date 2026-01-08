@@ -14,8 +14,6 @@ export const Timeline: React.FC<TimelineProps> = ({ updates }) => {
 
   const getSourceIcon = (source: ProgressUpdate['source']) => {
     switch (source) {
-      case 'TA':
-        return <User className="w-4 h-4" />;
       case 'ADMIN':
         return <Bot className="w-4 h-4" />;
       case 'SYSTEM':
@@ -25,8 +23,6 @@ export const Timeline: React.FC<TimelineProps> = ({ updates }) => {
 
   const getSourceColor = (source: ProgressUpdate['source']) => {
     switch (source) {
-      case 'TA':
-        return 'bg-blue-500';
       case 'ADMIN':
         return 'bg-purple-500';
       case 'SYSTEM':
@@ -36,8 +32,6 @@ export const Timeline: React.FC<TimelineProps> = ({ updates }) => {
 
   const getSourceLabel = (source: ProgressUpdate['source']) => {
     switch (source) {
-      case 'TA':
-        return 'Teknisi';
       case 'ADMIN':
         return 'Admin';
       case 'SYSTEM':

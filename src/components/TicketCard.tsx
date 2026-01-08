@@ -111,7 +111,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onCopyWhatsApp, 
                 asChild
               >
                 <a href={generateGoogleMapsLink(ticket.latitude, ticket.longitude)} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-4 h-4" />
+                  <MapPin className="w-4 h-4" />
                 </a>
               </Button>
             )}

@@ -1,11 +1,9 @@
 import { Ticket, User, ProgressUpdate, Notification, DashboardStats } from '@/types/ticket';
 
 export const mockUsers: User[] = [
-  { id: 'admin-1', name: 'Ahmad Rizki', role: 'admin', phone: '081234567890', area: 'Riau', isActive: true },
-  { id: 'ta-1', name: 'Budi Santoso', role: 'ta', phone: '081234567891', area: 'Pekanbaru', isActive: true },
-  { id: 'ta-2', name: 'Cahyo Pratama', role: 'ta', phone: '081234567892', area: 'Dumai', isActive: true },
-  { id: 'ta-3', name: 'Dewi Anggraini', role: 'ta', phone: '081234567893', area: 'Bengkalis', isActive: true },
-  { id: 'viewer-1', name: 'Eko Supervisor', role: 'viewer', area: 'Sumatra', isActive: true },
+  { id: 'admin-1', name: 'Ahmad Admin', role: 'admin', phone: '081234567890', area: 'Riau', isActive: true },
+  { id: 'hd-1', name: 'Rina HelpDesk', role: 'hd', phone: '081234567899', area: 'Pekanbaru', isActive: true },
+  { id: 'guest-1', name: 'Eko Guest', role: 'guest', area: 'Sumatra', isActive: true }
 ];
 
 const now = new Date();
@@ -33,7 +31,7 @@ export const mockProgressUpdates: ProgressUpdate[] = [
     id: 'pu-3',
     ticketId: 'TKT-001',
     timestamp: new Date(today.getTime() + 9 * 60 * 60 * 1000),
-    source: 'TA',
+    source: 'HD',
     message: 'On the way ke lokasi. ETA 30 menit.',
     statusAfterUpdate: 'ONPROGRESS',
     createdBy: 'ta-1',
@@ -42,7 +40,7 @@ export const mockProgressUpdates: ProgressUpdate[] = [
     id: 'pu-4',
     ticketId: 'TKT-001',
     timestamp: new Date(today.getTime() + 10 * 60 * 60 * 1000),
-    source: 'TA',
+    source: 'HD',
     message: 'On site. Melakukan pengecekan perangkat. Ditemukan FO putus di jalur 200m dari site.',
     statusAfterUpdate: 'ONPROGRESS',
     createdBy: 'ta-1',
@@ -119,7 +117,7 @@ export const mockTickets: Ticket[] = [
         id: 'pu-11',
         ticketId: 'TKT-002',
         timestamp: new Date(today.getTime() + 7 * 60 * 60 * 1000),
-        source: 'TA',
+        source: 'HD',
         message: 'On site. FO putus sepanjang 50m. Butuh material pengganti.',
         statusAfterUpdate: 'WAITING_MATERIAL',
         createdBy: 'ta-3',
@@ -187,7 +185,7 @@ export const mockTickets: Ticket[] = [
         id: 'pu-30',
         ticketId: 'TKT-004',
         timestamp: new Date(today.getTime() + 12 * 60 * 60 * 1000),
-        source: 'TA',
+        source: 'HD',
         message: 'Perbaikan temporary selesai. Menunggu material untuk permanen.',
         statusAfterUpdate: 'TEMPORARY',
         createdBy: 'ta-2',
@@ -224,7 +222,7 @@ export const mockTickets: Ticket[] = [
         id: 'pu-40',
         ticketId: 'TKT-005',
         timestamp: new Date(today.getTime() + 11.5 * 60 * 60 * 1000),
-        source: 'TA',
+        source: 'HD',
         message: 'Perbaikan permanen selesai. Tiket closed.',
         statusAfterUpdate: 'CLOSED',
         createdBy: 'ta-1',

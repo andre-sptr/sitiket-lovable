@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { StatsCard } from '@/components/StatsCard';
 import { TicketCard } from '@/components/TicketCard';
@@ -26,10 +28,20 @@ import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
   const todayTickets = getTodayTickets();
   const stats = mockDashboardStats;
   const settings = getSettings();
+
+  const handleRefresh = () => {
+    setIsRefreshing(true); 
+    setTimeout(() => {
+      setIsRefreshing(false);
+      toast({ title: "Data diperbarui", description: "Dashboard telah di-refresh" });
+    }, 1000);
+  };
 
   // Sort: overdue first, then by remaining TTR
   const sortedTickets = [...todayTickets].sort((a, b) => {
@@ -65,16 +77,20 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
-              <RefreshCw className="w-4 h-4" />
-              <span className="hidden sm:inline">Refresh</span>
+            <Button variant="outline" size="sm" className="gap-1" onClick={handleRefresh} disabled={isRefreshing}>
+              <RefreshCw 
+                className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} 
+              />
+              Refresh
             </Button>
-            <Link to="/import">
-              <Button size="sm" className="gap-2">
-                <Plus className="w-4 h-4" />
-                Import Tiket
-              </Button>
-            </Link>
+            {user?.role !== 'admin' && user?.role !== 'guest' && (
+              <Link to="/import">
+                <Button size="sm" className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Import Tiket
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 

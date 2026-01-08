@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'ta' | 'viewer';
+export type UserRole = 'admin' | 'guest' | 'hd';
 
 export type TicketStatus = 
   | 'OPEN' 
@@ -25,7 +25,7 @@ export interface ProgressUpdate {
   id: string;
   ticketId: string;
   timestamp: Date;
-  source: 'TA' | 'ADMIN' | 'SYSTEM';
+  source: 'HD' | 'ADMIN' | 'SYSTEM';
   message: string;
   statusAfterUpdate?: TicketStatus;
   locationUpdate?: { lat: number; lon: number };

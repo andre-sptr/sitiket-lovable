@@ -99,8 +99,6 @@ const TicketDetail = () => {
     setUpdateStatus('');
   };
 
-  const taUsers = mockUsers.filter(u => u.role === 'ta' && u.isActive);
-
   return (
     <Layout>
       <div className="space-y-4 md:space-y-6">
@@ -149,22 +147,6 @@ const TicketDetail = () => {
                   Pilih teknisi untuk menangani tiket ini
                 </DialogDescription>
               </DialogHeader>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih teknisi" />
-                </SelectTrigger>
-                <SelectContent>
-                  {taUsers.map(ta => (
-                    <SelectItem key={ta.id} value={ta.id}>
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        {ta.name}
-                        {ta.area && <span className="text-muted-foreground">({ta.area})</span>}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <DialogFooter>
                 <Button>Assign</Button>
               </DialogFooter>

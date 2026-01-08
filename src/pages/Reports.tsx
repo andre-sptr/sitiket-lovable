@@ -18,24 +18,6 @@ import {
 
 const Reports = () => {
   const stats = mockDashboardStats;
-  
-  // Calculate TA performance
-  const taUsers = mockUsers.filter(u => u.role === 'ta');
-  const taPerformance = taUsers.map(ta => {
-    const taTickets = mockTickets.filter(t => t.assignedTo === ta.id);
-    const closedTickets = taTickets.filter(t => t.status === 'CLOSED');
-    const overdueTickets = taTickets.filter(t => t.sisaTtrHours < 0 && t.status !== 'CLOSED');
-    
-    return {
-      ...ta,
-      totalTickets: taTickets.length,
-      closedTickets: closedTickets.length,
-      overdueTickets: overdueTickets.length,
-      complianceRate: taTickets.length > 0 
-        ? Math.round((taTickets.filter(t => t.ttrCompliance === 'COMPLY').length / taTickets.length) * 100)
-        : 0,
-    };
-  });
 
   // Calculate category breakdown
   const categoryBreakdown = mockTickets.reduce((acc, ticket) => {
@@ -49,7 +31,7 @@ const Reports = () => {
     return acc;
   }, {} as Record<string, { total: number; closed: number; overdue: number }>);
 
-  const handleExport = (type: 'daily' | 'weekly' | 'ta') => {
+  const handleExport = (type: 'daily' | 'weekly') => {
     // Mock export - in real app would generate file
     const filename = `laporan-${type}-${new Date().toISOString().split('T')[0]}.csv`;
     alert(`Export ${filename} (demo)`);
@@ -98,11 +80,6 @@ const Reports = () => {
             icon={TrendingUp}
             variant={stats.complianceRate >= 90 ? 'success' : 'warning'}
           />
-          <StatsCard
-            title="Total TA Aktif"
-            value={taUsers.filter(t => t.isActive).length}
-            icon={Users}
-          />
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
@@ -117,49 +94,6 @@ const Reports = () => {
                 Statistik per teknisi
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {taPerformance.map(ta => (
-                  <div key={ta.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center font-semibold">
-                        {ta.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-medium">{ta.name}</p>
-                        <p className="text-xs text-muted-foreground">{ta.area}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="text-center">
-                        <p className="font-semibold">{ta.totalTickets}</p>
-                        <p className="text-xs text-muted-foreground">Total</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="font-semibold text-emerald-600">{ta.closedTickets}</p>
-                        <p className="text-xs text-muted-foreground">Closed</p>
-                      </div>
-                      {ta.overdueTickets > 0 && (
-                        <div className="text-center">
-                          <p className="font-semibold text-destructive">{ta.overdueTickets}</p>
-                          <p className="text-xs text-muted-foreground">Overdue</p>
-                        </div>
-                      )}
-                      <Badge 
-                        variant={ta.complianceRate >= 90 ? 'comply' : ta.complianceRate >= 70 ? 'warning' : 'notcomply'}
-                      >
-                        {ta.complianceRate}%
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-
-                <Button variant="outline" className="w-full gap-2" onClick={() => handleExport('ta')}>
-                  <Download className="w-4 h-4" />
-                  Export Laporan TA
-                </Button>
-              </div>
-            </CardContent>
           </Card>
 
           {/* Category Breakdown */}

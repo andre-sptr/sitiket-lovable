@@ -33,14 +33,24 @@ interface LayoutProps {
 const adminNavItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/tickets', label: 'Semua Tiket', icon: Ticket },
-  { path: '/import', label: 'Import Tiket', icon: FileUp },
   { path: '/reports', label: 'Laporan', icon: BarChart3 },
   { path: '/users', label: 'Pengguna', icon: Users },
   { path: '/settings', label: 'Pengaturan', icon: Settings },
 ];
 
-const taNavItems = [
-  { path: '/my-tickets', label: 'Tiket Saya', icon: Ticket },
+const hdNavItems = [
+  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/tickets', label: 'Semua Tiket', icon: Ticket },
+  { path: '/import', label: 'Import Tiket', icon: FileUp },
+  { path: '/reports', label: 'Laporan', icon: BarChart3 },
+  { path: '/users', label: 'Pengguna', icon: Users },
+];
+
+const guestNavItems = [
+  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/tickets', label: 'Semua Tiket', icon: Ticket },
+  { path: '/reports', label: 'Laporan', icon: BarChart3 },
+  { path: '/users', label: 'Pengguna', icon: Users },
 ];
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -49,13 +59,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = user?.role === 'admin' ? adminNavItems : 
-                   user?.role === 'ta' ? taNavItems : 
-                   adminNavItems; // Viewer sees admin nav but read-only
+                   user?.role === 'hd' ? hdNavItems :
+                   user?.role === 'guest' ? guestNavItems : [];
 
   const unreadNotifications = mockNotifications.filter(n => !n.isRead && n.userId === user?.id).length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-200">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
         <div className="container mx-auto px-4">
@@ -146,7 +156,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                       <span className="text-xs font-normal text-muted-foreground capitalize">{user?.role}</span>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout} className="text-destructive">
                     <LogOut className="w-4 h-4 mr-2" />
