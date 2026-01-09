@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Settings as SettingsIcon, Clock, MessageSquare, Save, RotateCcw, AlertTriangle, Timer, Copy } from 'lucide-react';
+import { Settings as SettingsIcon, Clock, MessageSquare, Save, RotateCcw, AlertTriangle, Timer, Copy, List, Plus, X, GripVertical } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,8 +20,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { 
+  getDropdownOptions, 
+  saveDropdownOptions, 
+  defaultDropdownOptions,
+  dropdownLabels,
+  optionGroups,
+  DropdownOptions 
+} from '@/hooks/useDropdownOptions';
 
-// Default values
+// Default values for general settings
 const defaultSettings = {
   ttrThresholds: {
     warningHours: 2,
@@ -108,14 +123,108 @@ export const saveSettings = (settings: AppSettings): void => {
   localStorage.setItem('tiketops_settings', JSON.stringify(settings));
 };
 
+// Dropdown Option Editor Component
+const DropdownOptionEditor = ({
+  optionKey,
+  label,
+  values,
+  onChange,
+}: {
+  optionKey: string;
+  label: string;
+  values: string[];
+  onChange: (newValues: string[]) => void;
+}) => {
+  const [newItem, setNewItem] = useState('');
+
+  const handleAdd = () => {
+    if (newItem.trim() && !values.includes(newItem.trim())) {
+      onChange([...values, newItem.trim()]);
+      setNewItem('');
+    }
+  };
+
+  const handleRemove = (index: number) => {
+    const newValues = values.filter((_, i) => i !== index);
+    onChange(newValues);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAdd();
+    }
+  };
+
+  return (
+    <AccordionItem value={optionKey}>
+      <AccordionTrigger className="hover:no-underline">
+        <div className="flex items-center gap-3">
+          <span className="font-medium">{label}</span>
+          <Badge variant="secondary" className="text-xs">
+            {values.length} item
+          </Badge>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent>
+        <div className="space-y-3 pt-2">
+          {/* Add new item */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="Tambah opsi baru..."
+              value={newItem}
+              onChange={(e) => setNewItem(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-1"
+            />
+            <Button onClick={handleAdd} size="sm" disabled={!newItem.trim()}>
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* List of items */}
+          <div className="space-y-1 max-h-[300px] overflow-y-auto">
+            {values.map((value, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-2 p-2 bg-muted/50 rounded-md group hover:bg-muted"
+              >
+                <GripVertical className="w-4 h-4 text-muted-foreground opacity-50" />
+                <span className="flex-1 text-sm">{value}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => handleRemove(index)}
+                >
+                  <X className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          {values.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Belum ada opsi. Tambahkan opsi pertama di atas.
+            </p>
+          )}
+        </div>
+      </AccordionContent>
+    </AccordionItem>
+  );
+};
+
 const Settings = () => {
   const { toast } = useToast();
   const [settings, setSettings] = useState<AppSettings>(getSettings());
+  const [dropdownOptions, setDropdownOptions] = useState<DropdownOptions>(getDropdownOptions());
   const [hasChanges, setHasChanges] = useState(false);
+  const [hasDropdownChanges, setHasDropdownChanges] = useState(false);
 
   useEffect(() => {
     const stored = getSettings();
     setSettings(stored);
+    setDropdownOptions(getDropdownOptions());
   }, []);
 
   const handleThresholdChange = (key: keyof AppSettings['ttrThresholds'], value: number) => {
@@ -151,12 +260,29 @@ const Settings = () => {
     setHasChanges(true);
   };
 
+  const handleDropdownOptionChange = (key: keyof DropdownOptions, values: string[]) => {
+    setDropdownOptions(prev => ({
+      ...prev,
+      [key]: values,
+    }));
+    setHasDropdownChanges(true);
+  };
+
   const handleSave = () => {
     saveSettings(settings);
     setHasChanges(false);
     toast({
       title: "Pengaturan Disimpan",
       description: "Konfigurasi berhasil disimpan.",
+    });
+  };
+
+  const handleSaveDropdownOptions = () => {
+    saveDropdownOptions(dropdownOptions);
+    setHasDropdownChanges(false);
+    toast({
+      title: "Opsi Dropdown Disimpan",
+      description: "Semua perubahan opsi dropdown berhasil disimpan.",
     });
   };
 
@@ -167,6 +293,16 @@ const Settings = () => {
     toast({
       title: "Pengaturan Direset",
       description: "Konfigurasi dikembalikan ke default.",
+    });
+  };
+
+  const handleResetDropdownOptions = () => {
+    setDropdownOptions(defaultDropdownOptions);
+    saveDropdownOptions(defaultDropdownOptions);
+    setHasDropdownChanges(false);
+    toast({
+      title: "Opsi Dropdown Direset",
+      description: "Semua opsi dropdown dikembalikan ke default.",
     });
   };
 
@@ -205,52 +341,146 @@ const Settings = () => {
               Pengaturan
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Konfigurasi threshold TTR dan template WhatsApp
+              Konfigurasi sistem, dropdown options, dan template
             </p>
-          </div>
-          <div className="flex gap-2">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline">
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  Reset Default
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Reset Pengaturan?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tindakan ini akan mengembalikan semua konfigurasi ke nilai awal (default). 
-                    Perubahan yang disimpan akan hilang.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Batal</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleReset}>Ya, Reset</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            <Button onClick={handleSave} disabled={!hasChanges}>
-              <Save className="w-4 h-4 mr-2" />
-              Simpan
-            </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="ttr" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="dropdown" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="dropdown" className="gap-2">
+              <List className="w-4 h-4" />
+              <span className="hidden sm:inline">Opsi Dropdown</span>
+              <span className="sm:hidden">Dropdown</span>
+            </TabsTrigger>
             <TabsTrigger value="ttr" className="gap-2">
               <Clock className="w-4 h-4" />
-              Threshold TTR
+              <span className="hidden sm:inline">Threshold TTR</span>
+              <span className="sm:hidden">TTR</span>
             </TabsTrigger>
             <TabsTrigger value="whatsapp" className="gap-2">
               <MessageSquare className="w-4 h-4" />
-              Template WhatsApp
+              <span className="hidden sm:inline">Template WA</span>
+              <span className="sm:hidden">WA</span>
             </TabsTrigger>
           </TabsList>
 
+          {/* Dropdown Options Tab */}
+          <TabsContent value="dropdown" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">Kelola Opsi Dropdown</h2>
+                <p className="text-sm text-muted-foreground">
+                  Tambah, hapus, atau ubah opsi dropdown yang digunakan di form Import dan Update Tiket
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Reset
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Reset Opsi Dropdown?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Semua opsi dropdown akan dikembalikan ke nilai default. Perubahan yang disimpan akan hilang.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Batal</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleResetDropdownOptions}>Ya, Reset</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <Button onClick={handleSaveDropdownOptions} disabled={!hasDropdownChanges} size="sm">
+                  <Save className="w-4 h-4 mr-2" />
+                  Simpan
+                </Button>
+              </div>
+            </div>
+
+            {/* Import Tiket Options */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Form Import Tiket</CardTitle>
+                <CardDescription>
+                  Opsi dropdown yang digunakan saat membuat tiket baru
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="multiple" className="w-full">
+                  {optionGroups['Import Tiket'].map((key) => (
+                    <DropdownOptionEditor
+                      key={key}
+                      optionKey={key}
+                      label={dropdownLabels[key]}
+                      values={dropdownOptions[key]}
+                      onChange={(values) => handleDropdownOptionChange(key, values)}
+                    />
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
+
+            {/* Update Tiket Options */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Form Update Tiket</CardTitle>
+                <CardDescription>
+                  Opsi dropdown yang digunakan saat mengupdate tiket
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="multiple" className="w-full">
+                  {optionGroups['Update Tiket'].map((key) => (
+                    <DropdownOptionEditor
+                      key={key}
+                      optionKey={key}
+                      label={dropdownLabels[key]}
+                      values={dropdownOptions[key]}
+                      onChange={(values) => handleDropdownOptionChange(key, values)}
+                    />
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* TTR Thresholds Tab */}
           <TabsContent value="ttr" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div />
+              <div className="flex gap-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Reset
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Reset Pengaturan TTR?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Konfigurasi TTR akan dikembalikan ke nilai default.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Batal</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleReset}>Ya, Reset</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <Button onClick={handleSave} disabled={!hasChanges} size="sm">
+                  <Save className="w-4 h-4 mr-2" />
+                  Simpan
+                </Button>
+              </div>
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -415,6 +645,14 @@ const Settings = () => {
 
           {/* WhatsApp Templates Tab */}
           <TabsContent value="whatsapp" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div />
+              <Button onClick={handleSave} disabled={!hasChanges} size="sm">
+                <Save className="w-4 h-4 mr-2" />
+                Simpan
+              </Button>
+            </div>
+
             {/* Variable Reference */}
             <Card>
               <CardHeader>
