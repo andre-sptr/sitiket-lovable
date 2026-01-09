@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { TicketCard } from '@/components/TicketCard';
+import { TicketCardSkeleton } from '@/components/skeletons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,8 +14,15 @@ import { useToast } from '@/hooks/use-toast';
 const MyTickets = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   
   const myTickets = user ? getTicketsAssignedTo(user.id) : [];
+
+  // Simulate initial data loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
   
   // Sort: overdue first, then by remaining TTR, closed last
   const sortedTickets = [...myTickets].sort((a, b) => {
@@ -72,7 +81,9 @@ const MyTickets = () => {
 
         {/* Ticket List */}
         <div className="space-y-3">
-          {sortedTickets.length === 0 ? (
+          {isLoading ? (
+            <TicketCardSkeleton count={3} />
+          ) : sortedTickets.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <TicketIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p className="text-lg font-medium">Tidak ada tiket</p>

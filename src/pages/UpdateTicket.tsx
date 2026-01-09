@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
+import { UpdateFormSkeleton } from '@/components/skeletons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -123,11 +124,18 @@ const UpdateTicket = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { options: DROPDOWN_OPTIONS } = useDropdownOptions();
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<UpdateFormData>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof UpdateFormData, boolean>>>({});
 
   const ticket = getTicketById(id || '');
+
+  // Simulate loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, [id]);
 
   useEffect(() => {
     if (ticket) {
@@ -147,6 +155,14 @@ const UpdateTicket = () => {
       }));
     }
   }, [ticket]);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <UpdateFormSkeleton />
+      </Layout>
+    );
+  }
 
   if (!ticket) {
     return (

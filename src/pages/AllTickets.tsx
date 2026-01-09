@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { TicketCard } from '@/components/TicketCard';
+import { TicketCardSkeleton } from '@/components/skeletons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -38,9 +39,16 @@ const statusOptions: TicketStatus[] = [
 
 const AllTickets = () => {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [complianceFilter, setComplianceFilter] = useState<string>('ALL');
+
+  // Simulate initial data loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredTickets = mockTickets.filter(ticket => {
     // Search filter
@@ -245,7 +253,9 @@ const AllTickets = () => {
 
         {/* Ticket List */}
         <div className="space-y-3">
-          {sortedTickets.length === 0 ? (
+          {isLoading ? (
+            <TicketCardSkeleton count={5} />
+          ) : sortedTickets.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Filter className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>Tidak ada tiket yang sesuai filter</p>

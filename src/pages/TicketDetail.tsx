@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { StatusBadge, ComplianceBadge, TTRBadge } from '@/components/StatusBadge';
 import { Timeline } from '@/components/Timeline';
+import { TicketDetailSkeleton } from '@/components/skeletons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +32,6 @@ import {
   Phone
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -45,10 +46,25 @@ const TicketDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const [updateMessage, setUpdateMessage] = useState('');
   const [updateStatus, setUpdateStatus] = useState<TicketStatus | ''>('');
 
   const ticket = getTicketById(id || '');
+
+  // Simulate loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <TicketDetailSkeleton />
+      </Layout>
+    );
+  }
 
   if (!ticket) {
     return (

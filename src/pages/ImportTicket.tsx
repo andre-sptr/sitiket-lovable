@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
+import { FormSkeleton } from '@/components/skeletons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -89,9 +90,24 @@ const ImportTicket = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { options: DROPDOWN_OPTIONS } = useDropdownOptions();
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<TicketFormData>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof TicketFormData, boolean>>>({});
+
+  // Simulate initial loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <FormSkeleton sections={4} fieldsPerSection={6} />
+      </Layout>
+    );
+  }
 
   const updateField = (field: keyof TicketFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

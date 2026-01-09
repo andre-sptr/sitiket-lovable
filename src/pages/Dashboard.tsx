@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { StatsCard } from '@/components/StatsCard';
 import { TicketCard } from '@/components/TicketCard';
+import { StatsCardSkeleton, TicketCardSkeleton } from '@/components/skeletons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -20,8 +21,6 @@ import {
   TrendingUp,
   Percent,
   Plus,
-  Filter,
-  Copy,
   RefreshCw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -96,48 +95,68 @@ const Dashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          <StatsCard
-            title="Total Hari Ini"
-            value={stats.totalToday}
-            icon={TicketIcon}
-            variant="primary"
-          />
-          <StatsCard
-            title="Open/Unassigned"
-            value={stats.openTickets}
-            subtitle={unassignedTickets.length > 0 ? `${unassignedTickets.length} belum assign` : undefined}
-            icon={Clock}
-            variant="warning"
-          />
-          <StatsCard
-            title="Overdue"
-            value={stats.overdueTickets}
-            icon={AlertTriangle}
-            variant="danger"
-          />
-          <StatsCard
-            title="Closed Hari Ini"
-            value={stats.closedToday}
-            icon={CheckCircle2}
-            variant="success"
-          />
+          {isRefreshing ? (
+            <>
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+            </>
+          ) : (
+            <>
+              <StatsCard
+                title="Total Hari Ini"
+                value={stats.totalToday}
+                icon={TicketIcon}
+                variant="primary"
+              />
+              <StatsCard
+                title="Open/Unassigned"
+                value={stats.openTickets}
+                subtitle={unassignedTickets.length > 0 ? `${unassignedTickets.length} belum assign` : undefined}
+                icon={Clock}
+                variant="warning"
+              />
+              <StatsCard
+                title="Overdue"
+                value={stats.overdueTickets}
+                icon={AlertTriangle}
+                variant="danger"
+              />
+              <StatsCard
+                title="Closed Hari Ini"
+                value={stats.closedToday}
+                icon={CheckCircle2}
+                variant="success"
+              />
+            </>
+          )}
         </div>
 
         {/* Secondary Stats */}
         <div className="grid grid-cols-2 gap-3 md:gap-4">
-          <StatsCard
-            title="Rata-rata Respon"
-            value={`${stats.avgResponseTime}m`}
-            subtitle="Waktu respon pertama TA"
-            icon={TrendingUp}
-          />
-          <StatsCard
-            title="Compliance Rate"
-            value={`${stats.complianceRate}%`}
-            subtitle="Target: 90%"
-            icon={Percent}
-            variant={stats.complianceRate >= 90 ? 'success' : stats.complianceRate >= 70 ? 'warning' : 'danger'}
-          />
+          {isRefreshing ? (
+            <>
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+            </>
+          ) : (
+            <>
+              <StatsCard
+                title="Rata-rata Respon"
+                value={`${stats.avgResponseTime}m`}
+                subtitle="Waktu respon pertama TA"
+                icon={TrendingUp}
+              />
+              <StatsCard
+                title="Compliance Rate"
+                value={`${stats.complianceRate}%`}
+                subtitle="Target: 90%"
+                icon={Percent}
+                variant={stats.complianceRate >= 90 ? 'success' : stats.complianceRate >= 70 ? 'warning' : 'danger'}
+              />
+            </>
+          )}
         </div>
 
         {/* Alerts */}
@@ -176,7 +195,9 @@ const Dashboard = () => {
           </div>
           
           <div className="space-y-3">
-            {sortedTickets.length === 0 ? (
+            {isRefreshing ? (
+              <TicketCardSkeleton count={3} />
+            ) : sortedTickets.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <TicketIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>Belum ada tiket hari ini</p>
