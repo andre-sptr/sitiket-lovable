@@ -15,19 +15,7 @@ import {
 import { Save, RotateCcw, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-
-// Dropdown options - Admin can modify these later
-const DROPDOWN_OPTIONS = {
-  hsa: ['MIS', 'SLJ', 'TBH', 'DUM', 'PKU', 'BKN'],
-  sto: ['MIS', 'SLJ', 'TBH', 'DUM', 'PKU', 'BKN'],
-  odc: ['MIS', 'SLJ', 'TBH', 'DUM', 'PKU', 'BKN'],
-  stakeHolder: ['TLKM', 'OTHER'],
-  jenisPelanggan: ['TSEL', 'ISAT', 'XL', 'OTHER'],
-  kategori: ['CNQ', 'MINOR [8]', 'MINOR [12]', 'MINOR [24]', 'MAJOR', 'CRITICAL', 'LOW [24]'],
-  losNonLos: ['LOS', 'NON LOS', 'UNSPEC'],
-  classSite: ['Platinum', 'Gold', 'Silver', 'Bronze'],
-  tim: ['Tim A', 'Tim B', 'Selat Panjang'],
-};
+import { useDropdownOptions } from '@/hooks/useDropdownOptions';
 
 interface TicketFormData {
   // Lokasi
@@ -100,6 +88,7 @@ const REQUIRED_FIELDS: { field: keyof TicketFormData; label: string }[] = [
 const ImportTicket = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { options: DROPDOWN_OPTIONS } = useDropdownOptions();
   const [formData, setFormData] = useState<TicketFormData>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof TicketFormData, boolean>>>({});
@@ -150,7 +139,6 @@ const ImportTicket = () => {
 
   const handleSubmit = () => {
     if (!validateForm()) {
-      const errorCount = Object.keys(errors).length;
       toast({
         title: "Validasi Gagal",
         description: `Terdapat ${Object.keys(errors).length > 0 ? Object.keys(errors).length : 'beberapa'} field yang perlu diperbaiki`,

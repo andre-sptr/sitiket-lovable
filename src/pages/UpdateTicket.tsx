@@ -18,40 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getTicketById } from '@/lib/mockData';
 import { StatusBadge, TTRBadge, ComplianceBadge } from '@/components/StatusBadge';
 import { formatDateWIB } from '@/lib/formatters';
-
-// Dropdown options - Admin can modify these later
-const DROPDOWN_OPTIONS = {
-  statusTiket: ['OPEN', 'ASSIGNED', 'ONPROGRESS', 'TEMPORARY', 'WAITING_MATERIAL', 'WAITING_ACCESS', 'WAITING_COORDINATION', 'CLOSED'],
-  compliance: ['COMPLY', 'NOT COMPLY'],
-  permanenTemporer: ['PERMANEN', 'TEMPORER'],
-  statusAlatBerat: ['TIDAK PERLU', 'DIMINTA', 'DALAM PROSES', 'SELESAI'],
-  penyebabGangguan: [
-    'Kabel Putus',
-    'ODP Rusak',
-    'Connector Rusak',
-    'Power Off',
-    'Gangguan Cuaca',
-    'Gangguan Pihak Ketiga',
-    'Lainnya'
-  ],
-  perbaikanGangguan: [
-    'Splicing',
-    'Ganti Connector',
-    'Ganti ODP',
-    'Recovery Kabel',
-    'Reset Perangkat',
-    'Lainnya'
-  ],
-  kendala: [
-    'Tidak Ada Kendala',
-    'Akses Lokasi Sulit',
-    'Menunggu Material',
-    'Menunggu Koordinasi',
-    'Cuaca Buruk',
-    'Alat Berat Belum Tersedia',
-    'Lainnya'
-  ],
-};
+import { useDropdownOptions } from '@/hooks/useDropdownOptions';
 
 interface UpdateFormData {
   // Status & TTR
@@ -155,6 +122,7 @@ const UpdateTicket = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { options: DROPDOWN_OPTIONS } = useDropdownOptions();
   const [formData, setFormData] = useState<UpdateFormData>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof UpdateFormData, boolean>>>({});
