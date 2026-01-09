@@ -21,7 +21,7 @@ import { formatDateWIB } from '@/lib/formatters';
 
 // Dropdown options - Admin can modify these later
 const DROPDOWN_OPTIONS = {
-  statusTiket: ['OPEN', 'PENDING', 'ONPROGRESS', 'CLOSED'],
+  statusTiket: ['OPEN', 'ASSIGNED', 'ONPROGRESS', 'TEMPORARY', 'WAITING_MATERIAL', 'WAITING_ACCESS', 'WAITING_COORDINATION', 'CLOSED'],
   compliance: ['COMPLY', 'NOT COMPLY'],
   permanenTemporer: ['PERMANEN', 'TEMPORER'],
   statusAlatBerat: ['TIDAK PERLU', 'DIMINTA', 'DALAM PROSES', 'SELESAI'],
