@@ -25,30 +25,23 @@ import {
   User, 
   Copy, 
   ExternalLink,
-  MessageSquare,
-  UserPlus,
   FileText,
   Send,
   Phone
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { useAuth } from '@/contexts/AuthContext';
 
 const TicketDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [updateMessage, setUpdateMessage] = useState('');
   const [updateStatus, setUpdateStatus] = useState<TicketStatus | ''>('');
+
+  const isGuest = user?.role === 'guest';
 
   const ticket = getTicketById(id || '');
 
@@ -139,40 +132,23 @@ const TicketDetail = () => {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" className="gap-2" onClick={() => navigate(`/ticket/${id}/update`)}>
-            <FileText className="w-4 h-4" />
-            Update Tiket
-          </Button>
-          <Button variant="whatsapp" size="sm" className="gap-2" onClick={handleCopyShareMessage}>
-            <Copy className="w-4 h-4" />
-            Copy Pesan WA
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={handleCopyUpdateTemplate}>
-            <FileText className="w-4 h-4" />
-            Template Update
-          </Button>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                <UserPlus className="w-4 h-4" />
-                Assign TA
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Assign Teknisi</DialogTitle>
-                <DialogDescription>
-                  Pilih teknisi untuk menangani tiket ini
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button>Assign</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+        {/* Quick Actions - Hidden for Guest */}
+        {!isGuest && (
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" className="gap-2" onClick={() => navigate(`/ticket/${id}/update`)}>
+              <FileText className="w-4 h-4" />
+              Update Tiket
+            </Button>
+            <Button variant="whatsapp" size="sm" className="gap-2" onClick={handleCopyShareMessage}>
+              <Copy className="w-4 h-4" />
+              Copy Pesan WA
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleCopyUpdateTemplate}>
+              <FileText className="w-4 h-4" />
+              Template Update
+            </Button>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
           {/* Left Column - Info */}
@@ -313,43 +289,45 @@ const TicketDetail = () => {
 
           {/* Right Column - Timeline & Update */}
           <div className="lg:col-span-2 space-y-4">
-            {/* Quick Update Form */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Tambah Update</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Select value={updateStatus} onValueChange={(v) => setUpdateStatus(v as TicketStatus)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Status baru (opsional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ONPROGRESS">On Progress</SelectItem>
-                    <SelectItem value="TEMPORARY">Temporary</SelectItem>
-                    <SelectItem value="WAITING_MATERIAL">Menunggu Material</SelectItem>
-                    <SelectItem value="WAITING_ACCESS">Menunggu Akses</SelectItem>
-                    <SelectItem value="WAITING_COORDINATION">Menunggu Koordinasi</SelectItem>
-                    <SelectItem value="CLOSED">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Textarea
-                  placeholder="Tulis update progress... atau paste dari WhatsApp"
-                  value={updateMessage}
-                  onChange={(e) => setUpdateMessage(e.target.value)}
-                  className="min-h-[100px] resize-none"
-                />
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" size="sm" onClick={handleCopyUpdateTemplate}>
-                    <FileText className="w-4 h-4 mr-2" />
-                    Pakai Template
-                  </Button>
-                  <Button size="sm" onClick={handleSubmitUpdate}>
-                    <Send className="w-4 h-4 mr-2" />
-                    Kirim Update
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Quick Update Form - Hidden for Guest */}
+            {!isGuest && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Tambah Update</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Select value={updateStatus} onValueChange={(v) => setUpdateStatus(v as TicketStatus)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Status baru (opsional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ONPROGRESS">On Progress</SelectItem>
+                      <SelectItem value="TEMPORARY">Temporary</SelectItem>
+                      <SelectItem value="WAITING_MATERIAL">Menunggu Material</SelectItem>
+                      <SelectItem value="WAITING_ACCESS">Menunggu Akses</SelectItem>
+                      <SelectItem value="WAITING_COORDINATION">Menunggu Koordinasi</SelectItem>
+                      <SelectItem value="CLOSED">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Textarea
+                    placeholder="Tulis update progress... atau paste dari WhatsApp"
+                    value={updateMessage}
+                    onChange={(e) => setUpdateMessage(e.target.value)}
+                    className="min-h-[100px] resize-none"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" size="sm" onClick={handleCopyUpdateTemplate}>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Pakai Template
+                    </Button>
+                    <Button size="sm" onClick={handleSubmitUpdate}>
+                      <Send className="w-4 h-4 mr-2" />
+                      Kirim Update
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Timeline */}
             <Card>
