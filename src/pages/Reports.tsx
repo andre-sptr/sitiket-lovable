@@ -9,9 +9,12 @@ import {
   CheckCircle2,
   AlertTriangle,
   FileSpreadsheet,
-  Calendar,
-  PieChart
+  Calendar as CalendarIcon,
+  PieChart,
+  X,
+  Download
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import {
   ChartContainer,
   ChartTooltip,
@@ -21,22 +24,53 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { format, subDays, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import { id } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 const Reports = () => {
+  const { toast } = useToast();
   const stats = mockDashboardStats;
+  
+  // Date range filter state
+  const [dateRange, setDateRange] = useState<{
+    from: Date;
+    to: Date;
+  }>({
+    from: subDays(new Date(), 6),
+    to: new Date(),
+  });
 
-  // Generate data per periode (7 hari terakhir)
+  // Filter tickets based on date range
+  const filteredTickets = useMemo(() => {
+    return mockTickets.filter(ticket => {
+      const ticketDate = new Date(ticket.jamOpen);
+      return isWithinInterval(ticketDate, {
+        start: startOfDay(dateRange.from),
+        end: endOfDay(dateRange.to),
+      });
+    });
+  }, [dateRange]);
+
+  // Generate data per periode based on date range
   const periodData = useMemo(() => {
     const days = [];
-    const today = new Date();
+    const diffTime = Math.abs(dateRange.to.getTime() - dateRange.from.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
     
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      const dateStr = date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' });
+    for (let i = 0; i < diffDays; i++) {
+      const date = new Date(dateRange.from);
+      date.setDate(dateRange.from.getDate() + i);
+      const dateStr = format(date, 'EEE, d', { locale: id });
       
-      const ticketsOnDay = mockTickets.filter(ticket => {
+      const ticketsOnDay = filteredTickets.filter(ticket => {
         const ticketDate = new Date(ticket.jamOpen);
         return ticketDate.toDateString() === date.toDateString();
       });
@@ -51,12 +85,12 @@ const Reports = () => {
     }
     
     return days;
-  }, []);
+  }, [dateRange, filteredTickets]);
 
-  // Category breakdown data
+  // Category breakdown data based on filtered tickets
   const categoryData = useMemo(() => {
     const categories: Record<string, number> = {};
-    mockTickets.forEach(t => {
+    filteredTickets.forEach(t => {
       const cat = t.kategori || 'Lainnya';
       categories[cat] = (categories[cat] || 0) + 1;
     });
@@ -65,18 +99,18 @@ const Reports = () => {
       value,
       category: name,
     }));
-  }, []);
+  }, [filteredTickets]);
 
-  // Status breakdown data
+  // Status breakdown data based on filtered tickets
   const statusData = useMemo(() => {
     return [
-      { name: 'Open', value: mockTickets.filter(t => t.status === 'OPEN').length, status: 'open' },
-      { name: 'On Progress', value: mockTickets.filter(t => t.status === 'ONPROGRESS').length, status: 'onprogress' },
-      { name: 'Waiting', value: mockTickets.filter(t => t.status.startsWith('WAITING')).length, status: 'waiting' },
-      { name: 'Temporary', value: mockTickets.filter(t => t.status === 'TEMPORARY').length, status: 'temporary' },
-      { name: 'Closed', value: mockTickets.filter(t => t.status === 'CLOSED').length, status: 'closed' },
+      { name: 'Open', value: filteredTickets.filter(t => t.status === 'OPEN').length, status: 'open' },
+      { name: 'On Progress', value: filteredTickets.filter(t => t.status === 'ONPROGRESS').length, status: 'onprogress' },
+      { name: 'Waiting', value: filteredTickets.filter(t => t.status.startsWith('WAITING')).length, status: 'waiting' },
+      { name: 'Temporary', value: filteredTickets.filter(t => t.status === 'TEMPORARY').length, status: 'temporary' },
+      { name: 'Closed', value: filteredTickets.filter(t => t.status === 'CLOSED').length, status: 'closed' },
     ].filter(d => d.value > 0);
-  }, []);
+  }, [filteredTickets]);
 
   // Chart configs
   const barChartConfig: ChartConfig = {
@@ -102,9 +136,121 @@ const Reports = () => {
   const CATEGORY_COLORS = ['hsl(var(--primary))', 'hsl(45 93% 47%)', 'hsl(262 83% 58%)', 'hsl(174 72% 40%)', 'hsl(340 75% 55%)'];
   const STATUS_COLORS = ['hsl(var(--primary))', 'hsl(45 93% 47%)', 'hsl(25 95% 53%)', 'hsl(262 83% 58%)', 'hsl(142 76% 36%)'];
 
-  const handleExport = (type: 'daily' | 'weekly') => {
-    const filename = `laporan-${type}-${new Date().toISOString().split('T')[0]}.csv`;
-    alert(`Export ${filename} (demo)`);
+  // Export to CSV function
+  const exportToCSV = (exportType: 'full' | 'summary') => {
+    const dateFrom = format(dateRange.from, 'yyyy-MM-dd');
+    const dateTo = format(dateRange.to, 'yyyy-MM-dd');
+    
+    let csvContent = '';
+    let filename = '';
+
+    if (exportType === 'full') {
+      // Full ticket data export
+      filename = `laporan-tiket-lengkap_${dateFrom}_${dateTo}.csv`;
+      
+      // CSV headers
+      const headers = [
+        'ID Tiket',
+        'Provider',
+        'No. INC',
+        'Site Code',
+        'Site Name',
+        'Kategori',
+        'Lokasi',
+        'Status',
+        'TTR Compliance',
+        'Jam Open',
+        'Max Jam Close',
+        'Sisa TTR (Jam)',
+        'TTR Real (Jam)',
+        'Teknisi',
+        'Penyebab',
+        'Catatan Permanen'
+      ];
+      
+      csvContent = headers.join(',') + '\n';
+      
+      // CSV rows
+      filteredTickets.forEach(ticket => {
+        const row = [
+          ticket.id,
+          ticket.provider || '',
+          ticket.incNumbers?.join('; ') || '',
+          ticket.siteCode || '',
+          ticket.siteName || '',
+          ticket.kategori || '',
+          `"${ticket.lokasiText || ''}"`,
+          ticket.status,
+          ticket.ttrCompliance || '',
+          format(new Date(ticket.jamOpen), 'yyyy-MM-dd HH:mm'),
+          ticket.maxJamClose ? format(new Date(ticket.maxJamClose), 'yyyy-MM-dd HH:mm') : '',
+          ticket.sisaTtrHours?.toString() || '',
+          ticket.ttrRealHours?.toString() || '',
+          `"${ticket.teknisiList?.join(', ') || ''}"`,
+          `"${ticket.penyebab || ''}"`,
+          `"${ticket.permanentNotes || ''}"`
+        ];
+        csvContent += row.join(',') + '\n';
+      });
+    } else {
+      // Summary export
+      filename = `laporan-ringkasan_${dateFrom}_${dateTo}.csv`;
+      
+      // Summary by status
+      csvContent = 'RINGKASAN LAPORAN TIKET\n';
+      csvContent += `Periode: ${format(dateRange.from, 'dd MMM yyyy', { locale: id })} - ${format(dateRange.to, 'dd MMM yyyy', { locale: id })}\n\n`;
+      
+      csvContent += 'STATUS,JUMLAH\n';
+      statusData.forEach(s => {
+        csvContent += `${s.name},${s.value}\n`;
+      });
+      
+      csvContent += '\nKATEGORI,JUMLAH,CLOSED,PERSENTASE SELESAI\n';
+      categoryData.forEach(cat => {
+        const categoryTickets = filteredTickets.filter(t => t.kategori === cat.category);
+        const closed = categoryTickets.filter(t => t.status === 'CLOSED').length;
+        const percentage = categoryTickets.length > 0 ? Math.round((closed / categoryTickets.length) * 100) : 0;
+        csvContent += `${cat.name},${cat.value},${closed},${percentage}%\n`;
+      });
+      
+      csvContent += '\nSTATISTIK PER HARI\n';
+      csvContent += 'TANGGAL,OPEN,ON PROGRESS,CLOSED,TOTAL\n';
+      periodData.forEach(day => {
+        csvContent += `${day.name},${day.open},${day.onprogress},${day.closed},${day.total}\n`;
+      });
+    }
+
+    // Create and download file
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Export Berhasil",
+      description: `File ${filename} berhasil diunduh`,
+    });
+  };
+
+  // Preset date ranges
+  const handlePresetRange = (days: number) => {
+    setDateRange({
+      from: subDays(new Date(), days - 1),
+      to: new Date(),
+    });
+  };
+
+  const handleResetFilter = () => {
+    setDateRange({
+      from: subDays(new Date(), 6),
+      to: new Date(),
+    });
   };
 
   return (
@@ -119,16 +265,132 @@ const Reports = () => {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => handleExport('daily')}>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => exportToCSV('full')}>
               <FileSpreadsheet className="w-4 h-4" />
-              Export Harian
+              Export Data Lengkap
             </Button>
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => handleExport('weekly')}>
-              <Calendar className="w-4 h-4" />
-              Export Mingguan
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => exportToCSV('summary')}>
+              <Download className="w-4 h-4" />
+              Export Ringkasan
             </Button>
           </div>
         </div>
+
+        {/* Date Range Filter */}
+        <Card className="p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="w-5 h-5 text-muted-foreground" />
+              <span className="font-medium text-sm">Filter Periode:</span>
+            </div>
+            
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Preset buttons */}
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePresetRange(7)}
+                  className="text-xs"
+                >
+                  7 Hari
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePresetRange(14)}
+                  className="text-xs"
+                >
+                  14 Hari
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePresetRange(30)}
+                  className="text-xs"
+                >
+                  30 Hari
+                </Button>
+              </div>
+
+              <div className="h-6 w-px bg-border hidden sm:block" />
+
+              {/* Custom date range pickers */}
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "justify-start text-left font-normal text-xs min-w-[120px]",
+                        !dateRange.from && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-3 w-3" />
+                      {dateRange.from ? format(dateRange.from, "dd MMM yyyy", { locale: id }) : "Dari"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateRange.from}
+                      onSelect={(date) => date && setDateRange(prev => ({ ...prev, from: date }))}
+                      disabled={(date) => date > new Date() || date > dateRange.to}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <span className="text-muted-foreground text-sm">-</span>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "justify-start text-left font-normal text-xs min-w-[120px]",
+                        !dateRange.to && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-3 w-3" />
+                      {dateRange.to ? format(dateRange.to, "dd MMM yyyy", { locale: id }) : "Sampai"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateRange.to}
+                      onSelect={(date) => date && setDateRange(prev => ({ ...prev, to: date }))}
+                      disabled={(date) => date > new Date() || date < dateRange.from}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetFilter}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3 h-3 mr-1" />
+                  Reset
+                </Button>
+              </div>
+            </div>
+
+            {/* Summary badge */}
+            <div className="ml-auto">
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
+                {filteredTickets.length} tiket ditemukan
+              </span>
+            </div>
+          </div>
+        </Card>
 
         {/* Quick Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -163,7 +425,7 @@ const Reports = () => {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
-              Tiket per Periode (7 Hari Terakhir)
+              Tiket per Periode ({format(dateRange.from, "dd MMM", { locale: id })} - {format(dateRange.to, "dd MMM yyyy", { locale: id })})
             </CardTitle>
             <CardDescription>
               Jumlah tiket berdasarkan status per hari
@@ -281,7 +543,7 @@ const Reports = () => {
           <CardContent>
             <div className="space-y-3">
               {categoryData.map((cat) => {
-                const categoryTickets = mockTickets.filter(t => t.kategori === cat.category);
+                const categoryTickets = filteredTickets.filter(t => t.kategori === cat.category);
                 const closed = categoryTickets.filter(t => t.status === 'CLOSED').length;
                 const percentage = categoryTickets.length > 0 ? Math.round((closed / categoryTickets.length) * 100) : 0;
                 
