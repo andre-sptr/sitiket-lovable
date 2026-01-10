@@ -14,12 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Save, Clock, AlertTriangle, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, Clock, AlertTriangle, CheckCircle, AlertCircle, ShieldX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getTicketById } from '@/lib/mockData';
 import { StatusBadge, TTRBadge, ComplianceBadge } from '@/components/StatusBadge';
 import { formatDateWIB } from '@/lib/formatters';
 import { useDropdownOptions } from '@/hooks/useDropdownOptions';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UpdateFormData {
   // Status & TTR
@@ -123,6 +124,7 @@ const UpdateTicket = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { options: DROPDOWN_OPTIONS } = useDropdownOptions();
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<UpdateFormData>(emptyForm);
@@ -155,6 +157,24 @@ const UpdateTicket = () => {
       }));
     }
   }, [ticket]);
+
+  // Guest users cannot access this page
+  if (user?.role === 'guest') {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <ShieldX className="w-16 h-16 text-muted-foreground mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Akses Ditolak</h2>
+          <p className="text-muted-foreground mb-4">
+            Role Guest hanya dapat melihat data, tidak dapat menambah atau mengedit tiket.
+          </p>
+          <Button onClick={() => navigate('/dashboard')}>
+            Kembali ke Dashboard
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
 
   if (isLoading) {
     return (

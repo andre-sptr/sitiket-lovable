@@ -11,7 +11,6 @@ import {
   Search, 
   MoreVertical,
   Shield,
-  Wrench,
   Eye,
   Phone,
   MapPin,
@@ -32,21 +31,18 @@ import { useState } from 'react';
 const roleIcons = {
   admin: Shield,
   hd: Headphones,
-  ta: Wrench,
   guest: Eye,
 };
 
 const roleLabels = {
   admin: 'Admin',
   hd: 'Help Desk',
-  ta: 'Teknisi',
   guest: 'Guest',
 };
 
 const roleColors = {
   admin: 'bg-blue-100 text-blue-700 border-blue-200',
   hd: 'bg-purple-100 text-purple-700 border-purple-200',
-  ta: 'bg-amber-100 text-amber-700 border-amber-200',
   guest: 'bg-gray-100 text-gray-700 border-gray-200',
 };
 
@@ -83,7 +79,7 @@ const UserManagement = () => {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Pengguna</h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Kelola admin, help desk, teknisi, dan guest
+              Kelola admin, help desk, dan guest
             </p>
           </div>
           {currentUser?.role !== 'guest' && currentUser?.role !== 'hd' && (
