@@ -13,11 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Save, RotateCcw, AlertCircle, ShieldX } from 'lucide-react';
+import { Save, RotateCcw, AlertCircle, ShieldX, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useDropdownOptions } from '@/hooks/useDropdownOptions';
 import { useAuth } from '@/contexts/AuthContext';
+import { mockTeknisi } from '@/lib/mockData';
 
 interface TicketFormData {
   // Lokasi
@@ -399,7 +400,42 @@ const ImportTicket = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField label="Teknisi 1" field="teknisi1" placeholder="22010054-DIMAS RIO" />
+                {/* Teknisi Dropdown */}
+                <div className="space-y-1.5">
+                  <Label className={`text-xs font-medium ${errors.teknisi1 && touched.teknisi1 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    Teknisi
+                  </Label>
+                  <Select 
+                    value={formData.teknisi1} 
+                    onValueChange={(v) => updateField('teknisi1', v)}
+                  >
+                    <SelectTrigger className={errors.teknisi1 && touched.teknisi1 ? 'border-destructive' : ''}>
+                      <SelectValue placeholder="Pilih Teknisi" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockTeknisi.filter(t => t.isActive).map(teknisi => (
+                        <SelectItem key={teknisi.id} value={teknisi.name}>
+                          <div className="flex items-center gap-2">
+                            <span>{teknisi.name}</span>
+                            <span className="text-xs text-muted-foreground">({teknisi.area})</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {formData.teknisi1 && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                      <Phone className="w-3 h-3" />
+                      {mockTeknisi.find(t => t.name === formData.teknisi1)?.phone || '-'}
+                    </div>
+                  )}
+                  {errors.teknisi1 && touched.teknisi1 && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {errors.teknisi1}
+                    </p>
+                  )}
+                </div>
                 <SelectField label="Tim" field="tim" options={DROPDOWN_OPTIONS.tim} />
               </div>
             </CardContent>
