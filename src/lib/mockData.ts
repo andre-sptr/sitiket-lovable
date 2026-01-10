@@ -1,15 +1,31 @@
 import { Ticket, User, ProgressUpdate, Notification, DashboardStats } from '@/types/ticket';
 
+// Daftar Teknisi dengan nama dan nomor HP
+export interface Teknisi {
+  id: string;
+  name: string;
+  phone: string;
+  area: string;
+  isActive: boolean;
+}
+
+export const mockTeknisi: Teknisi[] = [
+  { id: 'tek-fedry', name: 'Fedry', phone: '081234567801', area: 'Kandis', isActive: true },
+  { id: 'tek-dimas', name: 'Dimas Rio Swardy Bintang', phone: '081234567802', area: 'Selat Panjang', isActive: true },
+  { id: 'tek-doni', name: 'Doni Harun', phone: '081234567803', area: 'Duri', isActive: true },
+  { id: 'tek-syukri', name: 'M. Syukri', phone: '081234567804', area: 'Duri', isActive: true },
+  { id: 'tek-wandoko', name: 'Sri Wandoko', phone: '081234567805', area: 'Bagan Siapi-Api', isActive: true },
+  { id: 'tek-rino', name: 'Rino Akta', phone: '081234567806', area: 'Bagan Siapi-Api', isActive: true },
+  { id: 'tek-adi', name: 'Adi Pratama', phone: '081234567807', area: 'Pekanbaru', isActive: true },
+  { id: 'tek-budi', name: 'Budi Santoso', phone: '081234567808', area: 'Dumai', isActive: true },
+  { id: 'tek-irwan', name: 'Irwan Setiawan', phone: '081234567809', area: 'Bengkalis', isActive: true },
+  { id: 'tek-hendra', name: 'Hendra Wijaya', phone: '081234567810', area: 'Tembilahan', isActive: true },
+];
+
 export const mockUsers: User[] = [
   { id: 'admin-1', name: 'Ahmad Admin', role: 'admin', phone: '081234567890', area: 'Riau', isActive: true },
   { id: 'hd-1', name: 'Rina HelpDesk', role: 'hd', phone: '081234567899', area: 'Pekanbaru', isActive: true },
   { id: 'guest-1', name: 'Eko Guest', role: 'guest', area: 'Sumatra', isActive: true },
-  { id: 'tek-fedry', name: 'Fedry', role: 'hd', phone: '081234567801', area: 'Kandis', isActive: true },
-  { id: 'tek-dimas', name: 'Dimas Rio Swardy Bintang', role: 'hd', phone: '081234567802', area: 'Selat Panjang', isActive: true },
-  { id: 'tek-doni', name: 'Doni Harun', role: 'hd', phone: '081234567803', area: 'Duri', isActive: true },
-  { id: 'tek-syukri', name: 'M. Syukri', role: 'hd', phone: '081234567804', area: 'Duri', isActive: true },
-  { id: 'tek-wandoko', name: 'Sri Wandoko', role: 'hd', phone: '081234567805', area: 'Bagan Siapi-Api', isActive: true },
-  { id: 'tek-rino', name: 'Rino Akta', role: 'hd', phone: '081234567806', area: 'Bagan Siapi-Api', isActive: true },
 ];
 
 export const mockProgressUpdates: ProgressUpdate[] = [];

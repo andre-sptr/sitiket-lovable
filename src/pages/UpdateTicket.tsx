@@ -14,9 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Save, Clock, AlertTriangle, CheckCircle, AlertCircle, ShieldX } from 'lucide-react';
+import { ArrowLeft, Save, Clock, AlertTriangle, CheckCircle, AlertCircle, ShieldX, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getTicketById } from '@/lib/mockData';
+import { getTicketById, mockTeknisi } from '@/lib/mockData';
 import { StatusBadge, TTRBadge, ComplianceBadge } from '@/components/StatusBadge';
 import { formatDateWIB } from '@/lib/formatters';
 import { useDropdownOptions } from '@/hooks/useDropdownOptions';
@@ -520,10 +520,38 @@ const UpdateTicket = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <InputField label="Teknisi 1" field="teknisi1" placeholder="Nama - NIK" />
-                <InputField label="Teknisi 2" field="teknisi2" placeholder="Nama - NIK" />
-                <InputField label="Teknisi 3" field="teknisi3" placeholder="Nama - NIK" />
-                <InputField label="Teknisi 4" field="teknisi4" placeholder="Nama - NIK" />
+                {(['teknisi1', 'teknisi2', 'teknisi3', 'teknisi4'] as const).map((field, idx) => (
+                  <div key={field} className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                      Teknisi {idx + 1}
+                    </Label>
+                    <Select 
+                      value={formData[field]} 
+                      onValueChange={(v) => updateField(field, v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih Teknisi" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">- Kosong -</SelectItem>
+                        {mockTeknisi.filter(t => t.isActive).map(teknisi => (
+                          <SelectItem key={teknisi.id} value={teknisi.name}>
+                            <div className="flex items-center gap-2">
+                              <span>{teknisi.name}</span>
+                              <span className="text-xs text-muted-foreground">({teknisi.area})</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {formData[field] && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                        <Phone className="w-3 h-3" />
+                        {mockTeknisi.find(t => t.name === formData[field])?.phone || '-'}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
