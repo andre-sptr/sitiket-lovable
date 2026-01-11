@@ -14,6 +14,7 @@ import MyTickets from "./pages/MyTickets";
 import Reports from "./pages/Reports";
 import UserManagement from "./pages/UserManagement";
 import Settings from "./pages/Settings";
+import TeknisiManagement from "./pages/TeknisiManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const AppRoutes = () => {
       <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
       <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/teknisi" element={<ProtectedRoute><TeknisiManagement /></ProtectedRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>

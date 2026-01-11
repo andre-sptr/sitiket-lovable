@@ -13,7 +13,8 @@ import {
   Menu, 
   X, 
   Bell,
-  ChevronDown
+  ChevronDown,
+  Wrench
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { mockNotifications } from '@/lib/mockData';
@@ -35,6 +36,7 @@ const adminNavItems = [
   { path: '/tickets', label: 'Semua Tiket', icon: Ticket },
   { path: '/reports', label: 'Laporan', icon: BarChart3 },
   { path: '/users', label: 'Pengguna', icon: Users },
+  { path: '/teknisi', label: 'Teknisi', icon: Wrench },
   { path: '/settings', label: 'Pengaturan', icon: Settings },
 ];
 
@@ -44,6 +46,7 @@ const hdNavItems = [
   { path: '/import', label: 'Import Tiket', icon: FileUp },
   { path: '/reports', label: 'Laporan', icon: BarChart3 },
   { path: '/users', label: 'Pengguna', icon: Users },
+  { path: '/teknisi', label: 'Teknisi', icon: Wrench },
 ];
 
 const guestNavItems = [
