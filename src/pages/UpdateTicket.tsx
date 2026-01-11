@@ -16,11 +16,12 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, Save, Clock, AlertTriangle, CheckCircle, AlertCircle, ShieldX, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getTicketById, mockTeknisi } from '@/lib/mockData';
+import { getTicketById } from '@/lib/mockData';
 import { StatusBadge, TTRBadge, ComplianceBadge } from '@/components/StatusBadge';
 import { formatDateWIB } from '@/lib/formatters';
 import { useDropdownOptions } from '@/hooks/useDropdownOptions';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTeknisi } from '@/hooks/useTeknisi';
 
 interface UpdateFormData {
   // Status & TTR
@@ -126,6 +127,7 @@ const UpdateTicket = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { options: DROPDOWN_OPTIONS } = useDropdownOptions();
+  const { activeTeknisi } = useTeknisi();
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<UpdateFormData>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -532,9 +534,9 @@ const UpdateTicket = () => {
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih Teknisi" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-background border shadow-lg z-50">
                         <SelectItem value="">- Kosong -</SelectItem>
-                        {mockTeknisi.filter(t => t.isActive).map(teknisi => (
+                        {activeTeknisi.map(teknisi => (
                           <SelectItem key={teknisi.id} value={teknisi.name}>
                             <div className="flex items-center gap-2">
                               <span>{teknisi.name}</span>
@@ -547,7 +549,7 @@ const UpdateTicket = () => {
                     {formData[field] && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                         <Phone className="w-3 h-3" />
-                        {mockTeknisi.find(t => t.name === formData[field])?.phone || '-'}
+                        {activeTeknisi.find(t => t.name === formData[field])?.phone || '-'}
                       </div>
                     )}
                   </div>
