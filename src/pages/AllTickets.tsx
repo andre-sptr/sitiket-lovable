@@ -48,7 +48,6 @@ const statusOptions: TicketStatus[] = [
   'CLOSED',
 ];
 
-// Extract unique values from tickets for filter options
 const getUniqueValues = (tickets: Ticket[], key: keyof Ticket): string[] => {
   const values = tickets.map(t => t[key]).filter(Boolean) as string[];
   return [...new Set(values)].sort();
@@ -58,7 +57,6 @@ const AllTickets = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   
-  // Search & Filters State
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [complianceFilter, setComplianceFilter] = useState<string>('ALL');
@@ -74,14 +72,12 @@ const AllTickets = () => {
   });
   const [sortBy, setSortBy] = useState<string>('ttr');
   
-  // Extract unique filter options from data
   const filterOptions = useMemo(() => ({
     providers: getUniqueValues(mockTickets, 'provider'),
     kategoris: getUniqueValues(mockTickets, 'kategori'),
     jaraks: getUniqueValues(mockTickets, 'jarakKmRange'),
   }), []);
 
-  // Simulate initial data loading
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
@@ -89,7 +85,6 @@ const AllTickets = () => {
 
   const filteredTickets = useMemo(() => {
     return mockTickets.filter(ticket => {
-      // Search filter - comprehensive search across multiple fields
       const searchLower = searchQuery.toLowerCase().trim();
       const matchesSearch = !searchLower || 
         ticket.incNumbers.some(inc => inc.toLowerCase().includes(searchLower)) ||
@@ -104,22 +99,16 @@ const AllTickets = () => {
         ticket.incGamas?.toLowerCase().includes(searchLower) ||
         ticket.kjd?.toLowerCase().includes(searchLower);
 
-      // Status filter
       const matchesStatus = statusFilter === 'ALL' || ticket.status === statusFilter;
 
-      // Compliance filter
       const matchesCompliance = complianceFilter === 'ALL' || ticket.ttrCompliance === complianceFilter;
 
-      // Provider filter
       const matchesProvider = providerFilter === 'ALL' || ticket.provider === providerFilter;
 
-      // Kategori filter
       const matchesKategori = kategoriFilter === 'ALL' || ticket.kategori === kategoriFilter;
 
-      // Jarak filter
       const matchesJarak = jarakFilter === 'ALL' || ticket.jarakKmRange === jarakFilter;
 
-      // Date range filter
       let matchesDateRange = true;
       if (dateRange.from && dateRange.to) {
         const ticketDate = new Date(ticket.jamOpen);
@@ -139,12 +128,10 @@ const AllTickets = () => {
   }, [searchQuery, statusFilter, complianceFilter, providerFilter, 
       kategoriFilter, jarakFilter, dateRange]);
 
-  // Sort tickets based on selected criteria
   const sortedTickets = useMemo(() => {
     return [...filteredTickets].sort((a, b) => {
       switch (sortBy) {
         case 'ttr':
-          // Closed tickets last, then by remaining TTR
           if (a.status === 'CLOSED' && b.status !== 'CLOSED') return 1;
           if (a.status !== 'CLOSED' && b.status === 'CLOSED') return -1;
           return a.sisaTtrHours - b.sisaTtrHours;
@@ -195,7 +182,6 @@ const AllTickets = () => {
     (jarakFilter !== 'ALL' ? 1 : 0) +
     (dateRange.from || dateRange.to ? 1 : 0);
 
-  // Filter component for reuse in desktop and mobile
   const FilterSelect = ({ 
     label, 
     value, 
@@ -232,7 +218,6 @@ const AllTickets = () => {
   return (
     <Layout>
       <div className="space-y-4 md:space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Semua Tiket</h1>
@@ -243,8 +228,7 @@ const AllTickets = () => {
               )}
             </p>
           </div>
-          
-          {/* Sort dropdown - desktop */}
+
           <div className="hidden md:flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Urutkan:</span>
             <Select value={sortBy} onValueChange={setSortBy}>
@@ -261,14 +245,12 @@ const AllTickets = () => {
           </div>
         </div>
 
-        {/* Search & Filters */}
         <div className="flex flex-col gap-3">
-          {/* Search Bar */}
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Cari INC, site, lokasi, teknisi, network element..."
+                placeholder="Cari INC, site, lokasi, teknisi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -285,7 +267,6 @@ const AllTickets = () => {
               )}
             </div>
 
-            {/* Mobile Filter Button */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" className="md:hidden gap-2 shrink-0">
@@ -306,7 +287,6 @@ const AllTickets = () => {
                   </SheetDescription>
                 </SheetHeader>
                 <div className="space-y-4 mt-4">
-                  {/* Sort */}
                   <FilterSelect
                     label="Urutkan"
                     value={sortBy}
@@ -317,8 +297,7 @@ const AllTickets = () => {
                   />
                   
                   <Separator />
-                  
-                  {/* Status */}
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Status</label>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -336,7 +315,6 @@ const AllTickets = () => {
                     </Select>
                   </div>
 
-                  {/* Compliance */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Compliance</label>
                     <Select value={complianceFilter} onValueChange={setComplianceFilter}>
@@ -351,7 +329,6 @@ const AllTickets = () => {
                     </Select>
                   </div>
 
-                  {/* Provider */}
                   <FilterSelect
                     label="Provider"
                     value={providerFilter}
@@ -360,7 +337,6 @@ const AllTickets = () => {
                     placeholder="Provider"
                   />
 
-                  {/* Kategori */}
                   <FilterSelect
                     label="Kategori"
                     value={kategoriFilter}
@@ -369,7 +345,6 @@ const AllTickets = () => {
                     placeholder="Kategori"
                   />
 
-                  {/* Jarak */}
                   <FilterSelect
                     label="Range Jarak"
                     value={jarakFilter}
@@ -378,7 +353,6 @@ const AllTickets = () => {
                     placeholder="Jarak"
                   />
 
-                  {/* Date Range */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Periode</label>
                     <div className="flex gap-2 flex-wrap">
@@ -475,7 +449,6 @@ const AllTickets = () => {
             </Sheet>
           </div>
 
-          {/* Desktop Filters */}
           <div className="hidden md:flex items-center gap-2 flex-wrap">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[150px]">
@@ -544,7 +517,6 @@ const AllTickets = () => {
               </SelectContent>
             </Select>
 
-            {/* Date Range Picker */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -629,7 +601,6 @@ const AllTickets = () => {
           </div>
         </div>
 
-        {/* Active Filters Display - Mobile */}
         {activeFiltersCount > 0 && (
           <div className="flex flex-wrap gap-2 md:hidden">
             {statusFilter !== 'ALL' && (
@@ -691,7 +662,6 @@ const AllTickets = () => {
           </div>
         )}
 
-        {/* Ticket List */}
         <div className="space-y-3">
           {isLoading ? (
             <TicketCardSkeleton count={5} />

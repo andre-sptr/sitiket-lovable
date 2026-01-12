@@ -21,20 +21,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTeknisi } from '@/hooks/useTeknisi';
 
 interface TicketFormData {
-  // Lokasi
   hsa: string;
   sto: string;
   odc: string;
   stakeHolder: string;
   jenisPelanggan: string;
   kategori: string;
-  // Info Tiket
   tiket: string;
   tiketTacc: string;
   indukGamas: string;
   kjd: string;
   summary: string;
-  // Pelanggan & Site
   idPelanggan: string;
   namaPelanggan: string;
   datek: string;
@@ -43,10 +40,8 @@ interface TicketFormData {
   classSite: string;
   koordinat: string;
   histori6Bulan: string;
-  // TTR Target & Report Date
   reportDate: string;
   ttrTarget: string;
-  // Teknisi awal
   teknisi1: string;
   tim: string;
 }
@@ -79,7 +74,6 @@ const emptyForm: TicketFormData = {
   tim: '',
 };
 
-// Define required fields with their labels
 const REQUIRED_FIELDS: { field: keyof TicketFormData; label: string }[] = [
   { field: 'tiket', label: 'No. Tiket (INC)' },
   { field: 'kategori', label: 'Kategori Tiket' },
@@ -99,13 +93,11 @@ const ImportTicket = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof TicketFormData, boolean>>>({});
 
-  // Simulate initial loading
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Guest users cannot access this page
   if (user?.role === 'guest') {
     return (
       <Layout>
@@ -133,7 +125,6 @@ const ImportTicket = () => {
 
   const updateField = (field: keyof TicketFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -152,14 +143,12 @@ const ImportTicket = () => {
       }
     });
 
-    // Additional validation for tiket format (INC number)
     if (formData.tiket && !formData.tiket.toUpperCase().startsWith('INC')) {
       newErrors.tiket = 'Format tiket harus dimulai dengan INC (contoh: INC44646411)';
     }
 
     setErrors(newErrors);
     
-    // Mark all required fields as touched
     const touchedFields: Partial<Record<keyof TicketFormData, boolean>> = {};
     REQUIRED_FIELDS.forEach(({ field }) => {
       touchedFields[field] = true;
@@ -185,7 +174,6 @@ const ImportTicket = () => {
       return;
     }
 
-    // TODO: Save to database - status will be set to OPEN by default
     toast({
       title: "Tiket Berhasil Disimpan",
       description: `Tiket ${formData.tiket} telah ditambahkan dengan status OPEN`,
@@ -289,7 +277,6 @@ const ImportTicket = () => {
   return (
     <Layout>
       <div className="space-y-6 max-w-5xl mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Input Tiket Baru</h1>
@@ -309,7 +296,6 @@ const ImportTicket = () => {
           </div>
         </div>
 
-        {/* Error Summary */}
         {hasErrors && Object.keys(touched).length > 0 && (
           <Card className="border-destructive bg-destructive/5">
             <CardContent className="py-3">
@@ -328,9 +314,7 @@ const ImportTicket = () => {
           </Card>
         )}
 
-        {/* Form Sections */}
         <div className="grid gap-6">
-          {/* Section 1: Lokasi & Kategori */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base">Lokasi & Kategori</CardTitle>
@@ -347,7 +331,6 @@ const ImportTicket = () => {
             </CardContent>
           </Card>
 
-          {/* Section 2: Info Tiket */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base">Informasi Tiket</CardTitle>
@@ -375,7 +358,6 @@ const ImportTicket = () => {
             </CardContent>
           </Card>
 
-          {/* Section 3: Info Pelanggan & Site */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base">Pelanggan & Site</CardTitle>
@@ -394,14 +376,12 @@ const ImportTicket = () => {
             </CardContent>
           </Card>
 
-          {/* Section 4: Teknisi & Tim */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base">Teknisi & Tim (Assign Awal)</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Teknisi Dropdown */}
                 <div className="space-y-1.5">
                   <Label className={`text-xs font-medium ${errors.teknisi1 && touched.teknisi1 ? 'text-destructive' : 'text-muted-foreground'}`}>
                     Teknisi
@@ -443,7 +423,6 @@ const ImportTicket = () => {
           </Card>
         </div>
 
-        {/* Bottom Actions */}
         <div className="flex justify-end gap-2 pb-6">
           <Button variant="outline" onClick={handleReset}>
             Reset Form

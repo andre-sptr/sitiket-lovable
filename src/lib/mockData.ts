@@ -1,6 +1,5 @@
 import { Ticket, User, ProgressUpdate, Notification, DashboardStats } from '@/types/ticket';
 
-// Daftar Teknisi dengan nama dan nomor HP
 export interface Teknisi {
   id: string;
   name: string;

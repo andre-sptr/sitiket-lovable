@@ -21,7 +21,8 @@ import {
   TrendingUp,
   Percent,
   Plus,
-  RefreshCw
+  RefreshCw,
+  ArrowRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
@@ -42,7 +43,6 @@ const Dashboard = () => {
     }, 1000);
   };
 
-  // Sort: overdue first, then by remaining TTR
   const sortedTickets = [...todayTickets].sort((a, b) => {
     if (a.status === 'CLOSED' && b.status !== 'CLOSED') return 1;
     if (a.status !== 'CLOSED' && b.status === 'CLOSED') return -1;
@@ -66,34 +66,36 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
-        {/* Header */}
+      <div className="space-y-6 lg:space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground text-sm mt-1">
               Tiket hari ini — {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-1" onClick={handleRefresh} disabled={isRefreshing}>
-              <RefreshCw 
-                className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} 
-              />
-              Refresh
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2 h-9" 
+              onClick={handleRefresh} 
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
             {user?.role !== 'admin' && user?.role !== 'guest' && (
               <Link to="/import">
-                <Button size="sm" className="gap-2">
+                <Button size="sm" className="gap-2 h-9">
                   <Plus className="w-4 h-4" />
-                  Import Tiket
+                  <span className="hidden sm:inline">Import Tiket</span>
                 </Button>
               </Link>
             )}
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {isRefreshing ? (
             <>
@@ -111,7 +113,7 @@ const Dashboard = () => {
                 variant="primary"
               />
               <StatsCard
-                title="Open/Unassigned"
+                title="Open"
                 value={stats.openTickets}
                 subtitle={unassignedTickets.length > 0 ? `${unassignedTickets.length} belum assign` : undefined}
                 icon={Clock}
@@ -124,7 +126,7 @@ const Dashboard = () => {
                 variant="danger"
               />
               <StatsCard
-                title="Closed Hari Ini"
+                title="Closed"
                 value={stats.closedToday}
                 icon={CheckCircle2}
                 variant="success"
@@ -133,7 +135,6 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Secondary Stats */}
         <div className="grid grid-cols-2 gap-3 md:gap-4">
           {isRefreshing ? (
             <>
@@ -159,23 +160,22 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Alerts */}
         {(overdueTickets.length > 0 || dueSoonTickets.length > 0 || unassignedTickets.length > 0) && (
           <div className="flex flex-wrap gap-2">
             {overdueTickets.length > 0 && (
-              <Badge variant="critical" className="gap-1.5 py-1.5 px-3">
+              <Badge variant="critical" className="gap-1.5 py-1.5 px-3 text-xs font-medium">
                 <AlertTriangle className="w-3.5 h-3.5" />
                 {overdueTickets.length} tiket overdue
               </Badge>
             )}
             {dueSoonTickets.length > 0 && (
-              <Badge variant="warning" className="gap-1.5 py-1.5 px-3">
+              <Badge variant="warning" className="gap-1.5 py-1.5 px-3 text-xs font-medium">
                 <Clock className="w-3.5 h-3.5" />
                 {dueSoonTickets.length} tiket hampir due
               </Badge>
             )}
             {unassignedTickets.length > 0 && (
-              <Badge variant="info" className="gap-1.5 py-1.5 px-3">
+              <Badge variant="info" className="gap-1.5 py-1.5 px-3 text-xs font-medium">
                 <TicketIcon className="w-3.5 h-3.5" />
                 {unassignedTickets.length} belum assign
               </Badge>
@@ -183,13 +183,13 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Ticket List */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Tiket Hari Ini</h2>
+            <h2 className="text-lg font-semibold text-foreground">Tiket Hari Ini</h2>
             <Link to="/tickets">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
                 Lihat Semua
+                <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
           </div>
@@ -198,9 +198,10 @@ const Dashboard = () => {
             {isRefreshing ? (
               <TicketCardSkeleton count={3} />
             ) : sortedTickets.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <TicketIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>Belum ada tiket hari ini</p>
+              <div className="text-center py-16 text-muted-foreground bg-muted/30 rounded-xl border border-dashed border-border">
+                <TicketIcon className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                <p className="font-medium">Belum ada tiket hari ini</p>
+                <p className="text-sm mt-1">Tiket yang dibuat hari ini akan muncul di sini</p>
               </div>
             ) : (
               sortedTickets.map((ticket, index) => (

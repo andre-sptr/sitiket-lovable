@@ -9,7 +9,6 @@ interface FormSkeletonProps {
 export const FormSkeleton = ({ sections = 4, fieldsPerSection = 6 }: FormSkeletonProps) => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <Skeleton className="h-8 w-48" />
@@ -21,7 +20,6 @@ export const FormSkeleton = ({ sections = 4, fieldsPerSection = 6 }: FormSkeleto
         </div>
       </div>
 
-      {/* Form Sections */}
       {Array.from({ length: sections }).map((_, sectionIndex) => (
         <Card key={sectionIndex}>
           <CardHeader className="pb-4">
@@ -40,7 +38,6 @@ export const FormSkeleton = ({ sections = 4, fieldsPerSection = 6 }: FormSkeleto
         </Card>
       ))}
 
-      {/* Bottom Actions */}
       <div className="flex justify-end gap-2 pb-6">
         <Skeleton className="h-10 w-28" />
         <Skeleton className="h-10 w-32" />
@@ -52,7 +49,6 @@ export const FormSkeleton = ({ sections = 4, fieldsPerSection = 6 }: FormSkeleto
 export const UpdateFormSkeleton = () => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Header */}
       <div className="flex items-start gap-3">
         <Skeleton className="h-10 w-10 rounded" />
         <div className="flex-1 space-y-2">
@@ -62,7 +58,6 @@ export const UpdateFormSkeleton = () => {
         <Skeleton className="h-10 w-36" />
       </div>
 
-      {/* Ticket Info Summary */}
       <Card className="bg-muted/30">
         <CardContent className="pt-4">
           <div className="flex flex-wrap items-center gap-4">
@@ -76,7 +71,6 @@ export const UpdateFormSkeleton = () => {
         </CardContent>
       </Card>
 
-      {/* Form Sections */}
       {[5, 4, 1, 4, 2].map((fields, sectionIndex) => (
         <Card key={sectionIndex}>
           <CardHeader className="pb-4">
@@ -99,7 +93,6 @@ export const UpdateFormSkeleton = () => {
         </Card>
       ))}
 
-      {/* Bottom Actions */}
       <div className="flex justify-end gap-2 pb-6">
         <Skeleton className="h-10 w-28" />
         <Skeleton className="h-10 w-36" />

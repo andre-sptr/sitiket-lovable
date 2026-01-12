@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
 export interface DropdownOptions {
-  // Import Ticket Options
   hsa: string[];
   sto: string[];
   odc: string[];
@@ -12,7 +11,6 @@ export interface DropdownOptions {
   classSite: string[];
   tim: string[];
   
-  // Update Ticket Options
   statusTiket: string[];
   compliance: string[];
   permanenTemporer: string[];
@@ -23,7 +21,6 @@ export interface DropdownOptions {
 }
 
 export const defaultDropdownOptions: DropdownOptions = {
-  // Import Ticket Options
   hsa: ['MIS', 'SLJ', 'TBH', 'DUM', 'PKU', 'BKN'],
   sto: ['MIS', 'SLJ', 'TBH', 'DUM', 'PKU', 'BKN'],
   odc: ['MIS', 'SLJ', 'TBH', 'DUM', 'PKU', 'BKN'],
@@ -34,7 +31,6 @@ export const defaultDropdownOptions: DropdownOptions = {
   classSite: ['Platinum', 'Gold', 'Silver', 'Bronze'],
   tim: ['Tim A', 'Tim B', 'Selat Panjang'],
   
-  // Update Ticket Options
   statusTiket: ['OPEN', 'ASSIGNED', 'ONPROGRESS', 'TEMPORARY', 'WAITING_MATERIAL', 'WAITING_ACCESS', 'WAITING_COORDINATION', 'CLOSED'],
   compliance: ['COMPLY', 'NOT COMPLY'],
   permanenTemporer: ['PERMANEN', 'TEMPORER'],
@@ -74,7 +70,6 @@ export const getDropdownOptions = (): DropdownOptions => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      // Merge with defaults to ensure all keys exist
       return { ...defaultDropdownOptions, ...parsed };
     }
   } catch (e) {
@@ -85,7 +80,6 @@ export const getDropdownOptions = (): DropdownOptions => {
 
 export const saveDropdownOptions = (options: DropdownOptions): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(options));
-  // Dispatch custom event to notify other components
   window.dispatchEvent(new CustomEvent('dropdown-options-updated'));
 };
 
@@ -97,9 +91,7 @@ export const useDropdownOptions = () => {
       setOptions(getDropdownOptions());
     };
 
-    // Listen for custom event
     window.addEventListener('dropdown-options-updated', handleUpdate);
-    // Listen for storage changes (for cross-tab sync)
     window.addEventListener('storage', (e) => {
       if (e.key === STORAGE_KEY) {
         handleUpdate();
@@ -124,7 +116,6 @@ export const useDropdownOptions = () => {
   return { options, refreshOptions, updateOptions };
 };
 
-// Labels for display in settings
 export const dropdownLabels: Record<keyof DropdownOptions, string> = {
   hsa: 'HSA (Holding Sub Area)',
   sto: 'STO (Sentral Telepon Otomat)',
@@ -144,7 +135,6 @@ export const dropdownLabels: Record<keyof DropdownOptions, string> = {
   kendala: 'Kendala',
 };
 
-// Group options for display
 export const optionGroups = {
   'Import Tiket': ['hsa', 'sto', 'odc', 'stakeHolder', 'jenisPelanggan', 'kategori', 'losNonLos', 'classSite', 'tim'] as (keyof DropdownOptions)[],
   'Update Tiket': ['statusTiket', 'compliance', 'permanenTemporer', 'statusAlatBerat', 'penyebabGangguan', 'perbaikanGangguan', 'kendala'] as (keyof DropdownOptions)[],

@@ -9,8 +9,6 @@ import {
   Clock, 
   User, 
   MessageSquare, 
-  Copy, 
-  ExternalLink,
   ChevronRight,
   AlertCircle
 } from 'lucide-react';
@@ -37,10 +35,11 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onCopyWhatsApp, 
   return (
     <Card 
       hover
-      className={`relative overflow-hidden ${isOverdue ? 'ring-2 ring-destructive/50 animate-pulse-glow' : ''} ${isDueSoon ? 'ring-2 ring-amber-400/50' : ''}`}
+      className={`relative overflow-hidden border-0 shadow-sm hover:shadow-md group cursor-pointer ${
+        isOverdue ? 'ring-1 ring-destructive/30 bg-destructive/[0.02]' : ''
+      } ${isDueSoon ? 'ring-1 ring-amber-400/30 bg-amber-500/[0.02]' : ''}`}
       onClick={handleClick}
     >
-      {/* Priority indicator strip */}
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${
         isOverdue ? 'bg-destructive' : 
         isDueSoon ? 'bg-amber-500' : 
@@ -49,11 +48,10 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onCopyWhatsApp, 
       }`} />
 
       <CardContent className="p-4 pl-5">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="font-mono text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 flex-wrap mb-1.5">
+              <span className="font-mono text-xs text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
                 {ticket.incNumbers[0]}
               </span>
               {ticket.incNumbers.length > 1 && (
@@ -62,24 +60,23 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onCopyWhatsApp, 
                 </span>
               )}
               {isUnassigned && (
-                <span className="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">
+                <span className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full font-medium">
                   <AlertCircle className="w-3 h-3" />
                   Belum assign
                 </span>
               )}
             </div>
-            <h3 className="font-semibold text-sm md:text-base truncate">
+            <h3 className="font-semibold text-sm md:text-base text-foreground group-hover:text-primary transition-colors line-clamp-1">
               {ticket.siteCode} - {ticket.siteName}
             </h3>
-            <span className="inline-block text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded mt-1">
+            <span className="inline-block text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full mt-1.5">
               {ticket.kategori}
             </span>
           </div>
           <StatusBadge status={ticket.status} size="sm" />
         </div>
 
-        {/* Info Grid */}
-        <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+        <div className="grid grid-cols-2 gap-y-1.5 gap-x-4 text-xs mb-3">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="truncate">{ticket.lokasiText}</span>
@@ -96,18 +93,17 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onCopyWhatsApp, 
           )}
         </div>
 
-        {/* TTR & Compliance */}
-        <div className="flex items-center justify-between gap-2 pt-3 border-t border-border/50">
+        <div className="flex items-center justify-between gap-2 pt-3 border-t border-border/60">
           <div className="flex items-center gap-2">
             <TTRBadge hours={ticket.sisaTtrHours} size="sm" />
             <ComplianceBadge compliance={ticket.ttrCompliance} size="sm" />
           </div>
-          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
             {ticket.latitude && ticket.longitude && (
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 rounded-lg"
                 asChild
               >
                 <a href={generateGoogleMapsLink(ticket.latitude, ticket.longitude)} target="_blank" rel="noopener noreferrer">
@@ -119,7 +115,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onCopyWhatsApp, 
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="h-8 w-8 text-[#25D366] hover:text-[#25D366] hover:bg-[#25D366]/10"
+                className="h-8 w-8 rounded-lg text-emerald-600 hover:text-emerald-600 hover:bg-emerald-500/10"
                 onClick={(e) => {
                   e.stopPropagation();
                   onCopyWhatsApp(ticket);
@@ -128,7 +124,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onCopyWhatsApp, 
                 <MessageSquare className="w-4 h-4" />
               </Button>
             )}
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary transition-colors ml-1" />
           </div>
         </div>
       </CardContent>

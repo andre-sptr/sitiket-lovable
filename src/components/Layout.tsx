@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { 
   LayoutDashboard, 
   Ticket, 
@@ -68,32 +68,31 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const unreadNotifications = mockNotifications.filter(n => !n.isRead && n.userId === user?.id).length;
 
   return (
-    <div className="min-h-screen bg-slate-200">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-14 md:h-16">
-            {/* Logo & Mobile Menu Toggle */}
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
+        <div className="container mx-auto px-4 lg:px-6">
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden"
+                className="md:hidden h-9 w-9"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </Button>
-              <Link to="/dashboard" className="flex items-center gap-2">
-                <img 
-                  src="/logo.png" 
-                  alt="Logo" 
-                  className="w-8 h-8 object-contain" 
-                />
-                <span className="font-bold text-lg hidden sm:block">SiTiket</span>
+              <Link to="/dashboard" className="flex items-center gap-2.5 group">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                  <img 
+                    src="/logo.png" 
+                    alt="Logo" 
+                    className="w-6 h-6 object-contain" 
+                  />
+                </div>
+                <span className="font-bold text-lg hidden sm:block text-foreground">SiTiket</span>
               </Link>
             </div>
 
-            {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -101,25 +100,29 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 return (
                   <Link key={item.path} to={item.path}>
                     <Button
-                      variant={isActive ? 'secondary' : 'ghost'}
+                      variant="ghost"
                       size="sm"
-                      className={`gap-2 ${isActive ? 'bg-secondary' : ''}`}
+                      className={`gap-2 h-9 px-3 font-medium transition-all duration-200 ${
+                        isActive 
+                          ? 'bg-primary/10 text-primary hover:bg-primary/15' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      }`}
                     >
                       <Icon className="w-4 h-4" />
-                      {item.label}
+                      <span className="hidden lg:inline">{item.label}</span>
                     </Button>
                   </Link>
                 );
               })}
             </nav>
 
-            {/* Right Actions */}
-            <div className="flex items-center gap-2">
-              {/* Notifications */}
+            <div className="flex items-center gap-1.5">
+              <ThemeToggle />
+              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="w-5 h-5" />
+                  <Button variant="ghost" size="icon" className="relative h-9 w-9">
+                    <Bell className="w-[18px] h-[18px]" />
                     {unreadNotifications > 0 && (
                       <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
                         {unreadNotifications}
@@ -127,40 +130,42 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-72">
-                  <DropdownMenuLabel>Notifikasi</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {mockNotifications.slice(0, 5).map((notif) => (
-                    <DropdownMenuItem key={notif.id} className="flex flex-col items-start gap-1 py-2">
-                      <span className={`text-sm ${!notif.isRead ? 'font-medium' : ''}`}>
-                        {notif.title}
-                      </span>
-                      <span className="text-xs text-muted-foreground">{notif.message}</span>
-                    </DropdownMenuItem>
-                  ))}
+                <DropdownMenuContent align="end" className="w-80 p-0">
+                  <DropdownMenuLabel className="px-4 py-3 border-b border-border">
+                    Notifikasi
+                  </DropdownMenuLabel>
+                  <div className="max-h-80 overflow-y-auto">
+                    {mockNotifications.slice(0, 5).map((notif) => (
+                      <DropdownMenuItem key={notif.id} className="flex flex-col items-start gap-1 px-4 py-3 cursor-pointer">
+                        <span className={`text-sm ${!notif.isRead ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
+                          {notif.title}
+                        </span>
+                        <span className="text-xs text-muted-foreground line-clamp-2">{notif.message}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <div className="w-7 h-7 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-semibold">
+                  <Button variant="ghost" size="sm" className="gap-2 h-9 pl-2 pr-3 ml-1">
+                    <div className="w-7 h-7 bg-gradient-to-br from-primary to-primary/70 text-primary-foreground rounded-lg flex items-center justify-center text-sm font-semibold">
                       {user?.name.charAt(0)}
                     </div>
-                    <span className="hidden sm:block max-w-[100px] truncate">{user?.name}</span>
-                    <ChevronDown className="w-4 h-4 hidden sm:block" />
+                    <span className="hidden sm:block max-w-[100px] truncate text-sm font-medium">{user?.name}</span>
+                    <ChevronDown className="w-3.5 h-3.5 hidden sm:block text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col">
-                      <span>{user?.name}</span>
-                      <span className="text-xs font-normal text-muted-foreground capitalize">{user?.role}</span>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{user?.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="text-destructive">
+                  <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
                     <LogOut className="w-4 h-4 mr-2" />
                     Keluar
                   </DropdownMenuItem>
@@ -171,11 +176,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </header>
 
-      {/* Mobile Nav Drawer */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
-          <nav className="fixed left-0 top-14 bottom-0 w-64 bg-card border-r border-border p-4 animate-slide-in-right">
+          <div 
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm" 
+            onClick={() => setIsMobileMenuOpen(false)} 
+          />
+          <nav className="fixed left-0 top-16 bottom-0 w-72 bg-card border-r border-border p-4 animate-slide-in-right shadow-xl">
             <div className="space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -187,8 +194,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Button
-                      variant={isActive ? 'secondary' : 'ghost'}
-                      className={`w-full justify-start gap-3 ${isActive ? 'bg-secondary' : ''}`}
+                      variant="ghost"
+                      className={`w-full justify-start gap-3 h-11 font-medium ${
+                        isActive 
+                          ? 'bg-primary/10 text-primary hover:bg-primary/15' 
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
                     >
                       <Icon className="w-5 h-5" />
                       {item.label}
@@ -201,8 +212,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       )}
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-4 md:py-6">
+      <main className="container mx-auto px-4 lg:px-6 py-6 lg:py-8">
         {children}
       </main>
     </div>

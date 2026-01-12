@@ -35,7 +35,6 @@ import {
   DropdownOptions 
 } from '@/hooks/useDropdownOptions';
 
-// Default values for general settings
 const defaultSettings = {
   ttrThresholds: {
     warningHours: 2,
@@ -105,7 +104,6 @@ export interface AppSettings {
   };
 }
 
-// Helper to get settings from localStorage
 export const getSettings = (): AppSettings => {
   try {
     const stored = localStorage.getItem('tiketops_settings');
@@ -118,12 +116,10 @@ export const getSettings = (): AppSettings => {
   return defaultSettings;
 };
 
-// Helper to save settings to localStorage
 export const saveSettings = (settings: AppSettings): void => {
   localStorage.setItem('tiketops_settings', JSON.stringify(settings));
 };
 
-// Dropdown Option Editor Component
 const DropdownOptionEditor = ({
   optionKey,
   label,
@@ -168,7 +164,6 @@ const DropdownOptionEditor = ({
       </AccordionTrigger>
       <AccordionContent>
         <div className="space-y-3 pt-2">
-          {/* Add new item */}
           <div className="flex gap-2">
             <Input
               placeholder="Tambah opsi baru..."
@@ -182,7 +177,6 @@ const DropdownOptionEditor = ({
             </Button>
           </div>
 
-          {/* List of items */}
           <div className="space-y-1 max-h-[300px] overflow-y-auto">
             {values.map((value, index) => (
               <div
@@ -333,7 +327,6 @@ const Settings = () => {
   return (
     <Layout>
       <div className="space-y-6 max-w-4xl mx-auto">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -365,7 +358,6 @@ const Settings = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Dropdown Options Tab */}
           <TabsContent value="dropdown" className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -402,7 +394,6 @@ const Settings = () => {
               </div>
             </div>
 
-            {/* Import Tiket Options */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Form Import Tiket</CardTitle>
@@ -425,7 +416,6 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* Update Tiket Options */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Form Update Tiket</CardTitle>
@@ -449,7 +439,6 @@ const Settings = () => {
             </Card>
           </TabsContent>
 
-          {/* TTR Thresholds Tab */}
           <TabsContent value="ttr" className="space-y-4">
             <div className="flex items-center justify-between">
               <div />
@@ -521,7 +510,6 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Warning Threshold */}
                 <div className="grid gap-2">
                   <Label htmlFor="warningHours" className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-yellow-500" />
@@ -544,7 +532,6 @@ const Settings = () => {
                   </div>
                 </div>
 
-                {/* Critical Threshold */}
                 <div className="grid gap-2">
                   <Label htmlFor="criticalHours" className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-500" />
@@ -567,7 +554,6 @@ const Settings = () => {
                   </div>
                 </div>
 
-                {/* Due Soon Alert */}
                 <div className="grid gap-2">
                   <Label htmlFor="dueSoonHours" className="flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-yellow-500" />
@@ -590,7 +576,6 @@ const Settings = () => {
                   </div>
                 </div>
 
-                {/* No Update Alert */}
                 <div className="grid gap-2">
                   <Label htmlFor="noUpdateAlertMinutes" className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-orange-500" />
@@ -615,7 +600,6 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* Preview Card */}
             <Card className="border-dashed">
               <CardHeader>
                 <CardTitle className="text-base">Preview Indikator</CardTitle>
@@ -643,7 +627,6 @@ const Settings = () => {
             </Card>
           </TabsContent>
 
-          {/* WhatsApp Templates Tab */}
           <TabsContent value="whatsapp" className="space-y-4">
             <div className="flex items-center justify-between">
               <div />
@@ -653,7 +636,6 @@ const Settings = () => {
               </Button>
             </div>
 
-            {/* Variable Reference */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Variabel Template</CardTitle>
@@ -673,7 +655,6 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* Share Template */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -706,7 +687,6 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* Update Template */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">

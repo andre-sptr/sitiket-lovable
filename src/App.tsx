@@ -10,7 +10,6 @@ import AllTickets from "./pages/AllTickets";
 import TicketDetail from "./pages/TicketDetail";
 import ImportTicket from "./pages/ImportTicket";
 import UpdateTicket from "./pages/UpdateTicket";
-import MyTickets from "./pages/MyTickets";
 import Reports from "./pages/Reports";
 import UserManagement from "./pages/UserManagement";
 import Settings from "./pages/Settings";
@@ -42,7 +41,6 @@ const AppRoutes = () => {
       <Route path="/ticket/:id" element={<ProtectedRoute><TicketDetail /></ProtectedRoute>} />
       <Route path="/ticket/:id/update" element={<ProtectedRoute><UpdateTicket /></ProtectedRoute>} />
       <Route path="/import" element={<ProtectedRoute><ImportTicket /></ProtectedRoute>} />
-      <Route path="/my-tickets" element={<ProtectedRoute><MyTickets /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
       <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

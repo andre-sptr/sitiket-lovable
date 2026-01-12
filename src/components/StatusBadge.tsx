@@ -46,7 +46,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, showIcon = tru
   return (
     <Badge 
       variant={statusVariantMap[status]} 
-      className={`gap-1 ${size === 'sm' ? 'text-[10px] px-2 py-0.5' : ''}`}
+      className={`gap-1.5 font-medium ${size === 'sm' ? 'text-[10px] px-2 py-0.5' : 'text-xs px-2.5 py-1'}`}
     >
       {showIcon && statusIconMap[status]}
       {getStatusLabel(status)}
@@ -63,7 +63,7 @@ export const ComplianceBadge: React.FC<ComplianceBadgeProps> = ({ compliance, si
   return (
     <Badge 
       variant={compliance === 'COMPLY' ? 'comply' : 'notcomply'}
-      className={`gap-1 ${size === 'sm' ? 'text-[10px] px-2 py-0.5' : ''}`}
+      className={`gap-1.5 font-medium ${size === 'sm' ? 'text-[10px] px-2 py-0.5' : 'text-xs px-2.5 py-1'}`}
     >
       {compliance === 'COMPLY' ? (
         <CheckCircle2 className="w-3 h-3" />
@@ -102,11 +102,11 @@ export const TTRBadge: React.FC<TTRBadgeProps> = ({ hours, size = 'default' }) =
   return (
     <Badge 
       variant={variantMap[ttrStatus]}
-      className={`font-mono gap-1 ${size === 'sm' ? 'text-[10px] px-2 py-0.5' : ''} ${ttrStatus === 'overdue' ? 'animate-pulse' : ''}`}
+      className={`font-mono gap-1.5 font-medium ${size === 'sm' ? 'text-[10px] px-2 py-0.5' : 'text-xs px-2.5 py-1'} ${ttrStatus === 'overdue' ? 'animate-pulse' : ''}`}
     >
       <Clock className="w-3 h-3" />
       {formatHours(hours)}
-      {ttrStatus === 'overdue' && <span className="ml-1">OVERDUE</span>}
+      {ttrStatus === 'overdue' && <span className="ml-0.5">OVERDUE</span>}
     </Badge>
   );
 };

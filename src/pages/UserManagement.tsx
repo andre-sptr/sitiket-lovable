@@ -74,7 +74,6 @@ const UserManagement = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Pengguna</h1>
@@ -90,7 +89,6 @@ const UserManagement = () => {
           )}
         </div>
 
-        {/* Search */}
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -101,7 +99,6 @@ const UserManagement = () => {
           />
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {Object.entries(usersByRole).map(([role, users]) => {
             const Icon = roleIcons[role as keyof typeof roleIcons];
@@ -129,7 +126,6 @@ const UserManagement = () => {
           })}
         </div>
 
-        {/* User List */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Daftar Pengguna</CardTitle>
@@ -148,12 +144,10 @@ const UserManagement = () => {
                     className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border border-border bg-card shadow-sm hover:shadow-md hover:border-primary/50 transition-all gap-4"
                   >
                     <div className="flex items-center gap-4 w-full sm:flex-1 sm:min-w-0">
-                      {/* Avatar */}
                       <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center text-lg font-semibold shrink-0">
                         {user.name.charAt(0)}
                       </div>
-                      
-                      {/* Info User */}
+
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-medium truncate">{user.name}</p>
@@ -171,7 +165,6 @@ const UserManagement = () => {
                           )}
                         </div>
                         
-                        {/* Detail Kontak & Lokasi */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1.5 text-sm text-muted-foreground">
                           {user.phone && (
                             <span className="flex items-center gap-1">

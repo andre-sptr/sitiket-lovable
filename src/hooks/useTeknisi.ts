@@ -8,7 +8,6 @@ export interface Teknisi {
   isActive: boolean;
 }
 
-// Default teknisi data
 const defaultTeknisiList: Teknisi[] = [
   { id: 'tek-fedry', name: 'Fedry', phone: '081234567801', area: 'Kandis', isActive: true },
   { id: 'tek-dimas', name: 'Dimas Rio Swardy Bintang', phone: '081234567802', area: 'Selat Panjang', isActive: true },
@@ -24,7 +23,6 @@ const defaultTeknisiList: Teknisi[] = [
 
 const STORAGE_KEY = 'tiketops_teknisi';
 
-// Get teknisi list from localStorage
 export const getTeknisiList = (): Teknisi[] => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -37,18 +35,15 @@ export const getTeknisiList = (): Teknisi[] => {
   return defaultTeknisiList;
 };
 
-// Save teknisi list to localStorage
 export const saveTeknisiList = (teknisiList: Teknisi[]): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(teknisiList));
   window.dispatchEvent(new CustomEvent('teknisi-updated'));
 };
 
-// Generate unique ID for new teknisi
 export const generateTeknisiId = (): string => {
   return `tek-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
-// Hook to manage teknisi data
 export const useTeknisi = () => {
   const [teknisiList, setTeknisiList] = useState<Teknisi[]>(getTeknisiList);
 
@@ -103,7 +98,6 @@ export const useTeknisi = () => {
     setTeknisiList(defaultTeknisiList);
   }, []);
 
-  // Get only active teknisi
   const activeTeknisi = teknisiList.filter((t) => t.isActive);
 
   return {

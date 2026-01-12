@@ -24,33 +24,22 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTeknisi } from '@/hooks/useTeknisi';
 
 interface UpdateFormData {
-  // Status & TTR
   statusTiket: string;
   closedDate: string;
   ttrSisa: string;
   compliance: string;
   penyebabNotComply: string;
-  
-  // Gangguan & Perbaikan
   segmenTerganggu: string;
   penyebabGangguan: string;
   perbaikanGangguan: string;
   statusAlatBerat: string;
-  
-  // Progress
   progressSaatIni: string;
-  
-  // Teknisi
   teknisi1: string;
   teknisi2: string;
   teknisi3: string;
   teknisi4: string;
-  
-  // Permanen/Temporer
   permanenTemporer: string;
   koordinatTipus: string;
-  
-  // Timeline MBB
   dispatchMbb: string;
   prepareTim: string;
   otwKeLokasi: string;
@@ -59,8 +48,6 @@ interface UpdateFormData {
   splicing: string;
   closing: string;
   totalTtr: string;
-  
-  // Kendala & Lainnya
   kendala: string;
   atbt: string;
   tiketEksternal: string;
@@ -98,22 +85,18 @@ const emptyForm: UpdateFormData = {
   tiketEksternal: '',
 };
 
-// Define required fields with their labels
 const REQUIRED_FIELDS: { field: keyof UpdateFormData; label: string }[] = [
   { field: 'statusTiket', label: 'Status Tiket' },
 ];
 
-// Conditional required fields
 const getConditionalRequiredFields = (formData: UpdateFormData): { field: keyof UpdateFormData; label: string }[] => {
   const conditionalFields: { field: keyof UpdateFormData; label: string }[] = [];
   
-  // If status is CLOSED, closedDate is required
   if (formData.statusTiket === 'CLOSED') {
     conditionalFields.push({ field: 'closedDate', label: 'Closed Date' });
     conditionalFields.push({ field: 'compliance', label: 'Compliance' });
   }
   
-  // If compliance is NOT COMPLY, reason is required
   if (formData.compliance === 'NOT COMPLY') {
     conditionalFields.push({ field: 'penyebabNotComply', label: 'Penyebab Not Comply' });
   }
@@ -135,7 +118,6 @@ const UpdateTicket = () => {
 
   const ticket = getTicketById(id || '');
 
-  // Simulate loading
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
@@ -143,7 +125,6 @@ const UpdateTicket = () => {
 
   useEffect(() => {
     if (ticket) {
-      // Pre-fill form with existing ticket data
       setFormData(prev => ({
         ...prev,
         statusTiket: ticket.status || '',
@@ -160,7 +141,6 @@ const UpdateTicket = () => {
     }
   }, [ticket]);
 
-  // Guest users cannot access this page
   if (user?.role === 'guest') {
     return (
       <Layout>
@@ -201,7 +181,6 @@ const UpdateTicket = () => {
 
   const updateField = (field: keyof UpdateFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -221,14 +200,12 @@ const UpdateTicket = () => {
       }
     });
 
-    // Validate closedDate format if provided
     if (formData.closedDate && !/^\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}$/.test(formData.closedDate)) {
       newErrors.closedDate = 'Format harus DD/MM/YYYY HH:MM';
     }
 
     setErrors(newErrors);
     
-    // Mark all required fields as touched
     const touchedFields: Partial<Record<keyof UpdateFormData, boolean>> = {};
     allRequiredFields.forEach(({ field }) => {
       touchedFields[field] = true;
@@ -248,7 +225,6 @@ const UpdateTicket = () => {
       return;
     }
 
-    // TODO: Save to database
     toast({
       title: "Update Berhasil",
       description: `Tiket ${ticket.incNumbers[0]} berhasil diupdate`,
@@ -356,7 +332,6 @@ const UpdateTicket = () => {
   return (
     <Layout>
       <div className="space-y-6 max-w-5xl mx-auto">
-        {/* Header */}
         <div className="flex items-start gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-5 h-5" />
@@ -373,7 +348,6 @@ const UpdateTicket = () => {
           </Button>
         </div>
 
-        {/* Ticket Info Summary */}
         <Card className="bg-muted/30">
           <CardContent className="pt-4">
             <div className="flex flex-wrap items-center gap-4">
@@ -405,7 +379,6 @@ const UpdateTicket = () => {
           </CardContent>
         </Card>
 
-        {/* Error Summary */}
         {hasErrors && Object.keys(touched).length > 0 && (
           <Card className="border-destructive bg-destructive/5">
             <CardContent className="py-3">
@@ -424,9 +397,7 @@ const UpdateTicket = () => {
           </Card>
         )}
 
-        {/* Form Sections */}
         <div className="grid gap-6">
-          {/* Section 1: Status & TTR */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base flex items-center gap-2">
@@ -466,7 +437,6 @@ const UpdateTicket = () => {
             </CardContent>
           </Card>
 
-          {/* Section 2: Gangguan & Perbaikan */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base flex items-center gap-2">
@@ -500,7 +470,6 @@ const UpdateTicket = () => {
             </CardContent>
           </Card>
 
-          {/* Section 3: Progress */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base">Progress Saat Ini</CardTitle>
@@ -515,7 +484,6 @@ const UpdateTicket = () => {
             </CardContent>
           </Card>
 
-          {/* Section 4: Teknisi */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base">Tim Teknisi</CardTitle>
@@ -558,7 +526,6 @@ const UpdateTicket = () => {
             </CardContent>
           </Card>
 
-          {/* Section 5: Permanen/Temporer */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base flex items-center gap-2">
@@ -582,7 +549,6 @@ const UpdateTicket = () => {
             </CardContent>
           </Card>
 
-          {/* Section 6: Timeline MBB */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base">Timeline Penanganan (MBB)</CardTitle>
@@ -601,7 +567,6 @@ const UpdateTicket = () => {
             </CardContent>
           </Card>
 
-          {/* Section 7: Kendala & Lainnya */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-base">Kendala & Informasi Lainnya</CardTitle>
@@ -620,7 +585,6 @@ const UpdateTicket = () => {
           </Card>
         </div>
 
-        {/* Bottom Actions */}
         <div className="flex justify-end gap-2 pb-6">
           <Button variant="outline" onClick={() => navigate(-1)}>
             Batal

@@ -58,7 +58,6 @@ export const useSettings = () => {
   return { settings, refreshSettings };
 };
 
-// Helper function to get TTR status based on settings
 export const getTTRStatus = (hours: number, thresholds: AppSettings['ttrThresholds']): 'safe' | 'warning' | 'critical' | 'overdue' => {
   if (hours <= 0) return 'overdue';
   if (hours <= thresholds.criticalHours) return 'critical';
@@ -66,7 +65,6 @@ export const getTTRStatus = (hours: number, thresholds: AppSettings['ttrThreshol
   return 'safe';
 };
 
-// Helper to check if ticket is due soon
 export const isDueSoon = (hours: number, thresholds: AppSettings['ttrThresholds']): boolean => {
   return hours > 0 && hours <= thresholds.dueSoonHours;
 };

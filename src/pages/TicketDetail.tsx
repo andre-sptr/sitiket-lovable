@@ -45,7 +45,6 @@ const TicketDetail = () => {
 
   const ticket = getTicketById(id || '');
 
-  // Simulate loading
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
@@ -111,7 +110,6 @@ const TicketDetail = () => {
   return (
     <Layout>
       <div className="space-y-4 md:space-y-6">
-        {/* Header */}
         <div className="flex items-start gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-5 h-5" />
@@ -132,7 +130,6 @@ const TicketDetail = () => {
           </div>
         </div>
 
-        {/* Quick Actions - Hidden for Guest */}
         {!isGuest && (
           <div className="flex flex-wrap gap-2">
             <Button size="sm" className="gap-2" onClick={() => navigate(`/ticket/${id}/update`)}>
@@ -151,9 +148,7 @@ const TicketDetail = () => {
         )}
 
         <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
-          {/* Left Column - Info */}
           <div className="lg:col-span-1 space-y-4">
-            {/* TTR Card */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -186,7 +181,6 @@ const TicketDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Location Card */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -229,7 +223,6 @@ const TicketDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Assignment Card */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -255,7 +248,6 @@ const TicketDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Details Card */}
             {(ticket.penyebab || ticket.segmen || ticket.networkElement) && (
               <Card>
                 <CardHeader className="pb-2">
@@ -287,9 +279,7 @@ const TicketDetail = () => {
             )}
           </div>
 
-          {/* Right Column - Timeline & Update */}
           <div className="lg:col-span-2 space-y-4">
-            {/* Quick Update Form - Hidden for Guest */}
             {!isGuest && (
               <Card>
                 <CardHeader className="pb-3">
@@ -310,7 +300,7 @@ const TicketDetail = () => {
                     </SelectContent>
                   </Select>
                   <Textarea
-                    placeholder="Tulis update progress... atau paste dari WhatsApp"
+                    placeholder="Tulis update progress..."
                     value={updateMessage}
                     onChange={(e) => setUpdateMessage(e.target.value)}
                     className="min-h-[100px] resize-none"
@@ -329,7 +319,6 @@ const TicketDetail = () => {
               </Card>
             )}
 
-            {/* Timeline */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">

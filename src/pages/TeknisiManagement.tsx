@@ -62,7 +62,6 @@ const TeknisiManagement = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTeknisi, setSelectedTeknisi] = useState<Teknisi | null>(null);
   
-  // Form state for add/edit
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -70,7 +69,6 @@ const TeknisiManagement = () => {
     isActive: true,
   });
 
-  // Check if user is guest (view only)
   if (user?.role === 'guest') {
     return (
       <Layout>
@@ -89,7 +87,6 @@ const TeknisiManagement = () => {
     );
   }
 
-  // Filter teknisi based on search
   const filteredTeknisi = teknisiList.filter((t) =>
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.area.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -193,7 +190,6 @@ const TeknisiManagement = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -288,7 +284,6 @@ const TeknisiManagement = () => {
           </div>
         </div>
 
-        {/* Search and Stats */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -309,7 +304,6 @@ const TeknisiManagement = () => {
           </div>
         </div>
 
-        {/* Teknisi Table */}
         <Card>
           <CardHeader>
             <CardTitle>Daftar Teknisi</CardTitle>
@@ -397,7 +391,6 @@ const TeknisiManagement = () => {
           </CardContent>
         </Card>
 
-        {/* Edit Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
             <DialogHeader>

@@ -98,7 +98,6 @@ export const generateGoogleMapsLink = (lat?: number, lon?: number): string => {
   return `https://www.google.com/maps?q=${lat},${lon}`;
 };
 
-// Default templates (fallback if settings are empty)
 const defaultShareTemplate = `🎫 *TIKET HARI INI*
 ━━━━━━━━━━━━━━━━━━
 *[{{kategori}}] - {{siteCode}}*
@@ -132,7 +131,6 @@ const defaultUpdateTemplate = `📍 *UPDATE PROGRESS*
 🆘 Butuh Bantuan: [Ya/Tidak + detail]
 ━━━━━━━━━━━━━━━━━━`;
 
-// Replace template variables with actual values
 const replaceTemplateVariables = (
   template: string,
   variables: Record<string, string>
@@ -169,7 +167,6 @@ export const generateWhatsAppMessage = (
     ? `${ticket.latitude}, ${ticket.longitude}` 
     : '-';
 
-  // Build variables object for template replacement
   const variables: Record<string, string> = {
     kategori: ticket.kategori,
     siteCode: ticket.siteCode,
@@ -191,7 +188,6 @@ export const generateWhatsAppMessage = (
     return replaceTemplateVariables(template, variables);
   }
   
-  // Update template
   const template = settings.whatsappTemplates.updateTemplate || defaultUpdateTemplate;
   return replaceTemplateVariables(template, variables);
 };

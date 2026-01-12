@@ -2,7 +2,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserRole } from '@/types/ticket';
-import { Ticket, Shield, Wrench, Eye, Headphones } from 'lucide-react';
+import { Ticket, Shield, Eye, Headphones, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
@@ -12,15 +12,15 @@ const roleCards = [
     title: 'Admin',
     description: 'Kelola tiket & monitor SLA',
     icon: Shield,
-    color: 'from-blue-600 to-blue-700',
+    gradient: 'from-primary to-primary/70',
     redirect: '/dashboard',
   },
   {
     role: 'hd' as UserRole,
-    title: 'Help Desk (HD)',
+    title: 'Help Desk',
     description: 'Input tiket, monitoring & dispatch',
     icon: Headphones,
-    color: 'from-purple-500 to-purple-600', 
+    gradient: 'from-violet-500 to-purple-600', 
     redirect: '/dashboard',
   },
   {
@@ -28,7 +28,7 @@ const roleCards = [
     title: 'Guest',
     description: 'Monitoring dashboard (read-only)',
     icon: Eye,
-    color: 'from-emerald-500 to-emerald-600',
+    gradient: 'from-emerald-500 to-teal-600',
     redirect: '/dashboard',
   },
 ];
@@ -49,49 +49,49 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      {/* Background pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtNi42MjcgMC0xMiA1LjM3My0xMiAxMnM1LjM3MyAxMiAxMiAxMiAxMi01LjM3MyAxMi0xMi01LjM3My0xMi0xMi0xMnptMCAyMGMtNC40MTggMC04LTMuNTgyLTgtOHMzLjU4Mi04IDgtOCA4IDMuNTgyIDggOC0zLjU4MiA4LTggOHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjAyIi8+PC9nPjwvc3ZnPg==')] opacity-30" />
+    <div className="dark min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-50" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl opacity-50" />
       
       <div className="relative w-full max-w-4xl animate-fade-in">
-        {/* Logo & Title */}
-        <div className="text-center mb-8 md:mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-primary to-primary/70 rounded-2xl mb-4 shadow-glow">
-            <Ticket className="w-8 h-8 md:w-10 md:h-10 text-white" />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">SiTiket</h1>
-          <p className="text-slate-400 text-sm md:text-base">
-            Demo/Prototipe Sistem Manajemen Tiket Gangguan Telkom Infra
+        <div className="text-center mb-10 md:mb-14">
+          <img 
+            src="/logo.png" 
+            alt="SiTiket Logo" 
+            className="w-16 h-16 md:w-20 md:h-20 mb-5 object-contain mx-auto" 
+          />
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">SiTiket</h1>
+          <p className="text-muted-foreground text-sm md:text-base max-w-md mx-auto">
+            Demo/Prototipe Sistem Manajemen Tiket Gangguan
           </p>
         </div>
 
-        {/* Role Selection */}
-        <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+        <div className="flex flex-wrap justify-center gap-4 md:gap-5">
           {roleCards.map((card, index) => {
             const Icon = card.icon;
             return (
               <Card 
                 key={card.role} 
-                hover
-                className="w-full md:w-[30%] min-w-[280px] bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer group"
+                className="w-full md:w-[calc(33.333%-1rem)] min-w-[280px] max-w-[320px] border-border/50 hover:border-primary/30 bg-card/80 backdrop-blur-sm transition-all duration-300 cursor-pointer group hover:shadow-lg hover:-translate-y-1"
                 style={{ animationDelay: `${index * 100}ms` }}
                 onClick={() => handleLogin(card.role, card.redirect)}
               >
-                <CardHeader className="text-center pb-2">
-                  <div className={`mx-auto w-14 h-14 bg-gradient-to-br ${card.color} rounded-xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-transform`}>
+                <CardHeader className="text-center pb-3">
+                  <div className={`mx-auto w-14 h-14 bg-gradient-to-br ${card.gradient} rounded-xl flex items-center justify-center mb-4 shadow-md group-hover:scale-105 transition-transform duration-300`}>
                     <Icon className="w-7 h-7 text-white" />
                   </div>
-                  <CardTitle className="text-white text-lg">{card.title}</CardTitle>
+                  <CardTitle className="text-foreground text-lg font-semibold">{card.title}</CardTitle>
                 </CardHeader>
-                <CardContent className="text-center">
-                  <CardDescription className="text-slate-400 text-sm">
+                <CardContent className="text-center pb-6">
+                  <CardDescription className="text-muted-foreground text-sm mb-5">
                     {card.description}
                   </CardDescription>
                   <Button 
                     variant="outline" 
-                    className="mt-4 w-full bg-transparent border-white/20 text-white hover:bg-white/20 hover:text-white"
+                    className="w-full gap-2 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300"
                   >
-                    Masuk sebagai {card.title}
+                    Masuk
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardContent>
               </Card>

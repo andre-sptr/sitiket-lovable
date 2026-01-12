@@ -38,8 +38,7 @@ import {
 const Reports = () => {
   const { toast } = useToast();
   const stats = mockDashboardStats;
-  
-  // Date range filter state
+
   const [dateRange, setDateRange] = useState<{
     from: Date;
     to: Date;
@@ -48,7 +47,6 @@ const Reports = () => {
     to: new Date(),
   });
 
-  // Filter tickets based on date range
   const filteredTickets = useMemo(() => {
     return mockTickets.filter(ticket => {
       const ticketDate = new Date(ticket.jamOpen);
@@ -59,7 +57,6 @@ const Reports = () => {
     });
   }, [dateRange]);
 
-  // Generate data per periode based on date range
   const periodData = useMemo(() => {
     const days = [];
     const diffTime = Math.abs(dateRange.to.getTime() - dateRange.from.getTime());
@@ -87,7 +84,6 @@ const Reports = () => {
     return days;
   }, [dateRange, filteredTickets]);
 
-  // Category breakdown data based on filtered tickets
   const categoryData = useMemo(() => {
     const categories: Record<string, number> = {};
     filteredTickets.forEach(t => {
@@ -101,7 +97,6 @@ const Reports = () => {
     }));
   }, [filteredTickets]);
 
-  // Status breakdown data based on filtered tickets
   const statusData = useMemo(() => {
     return [
       { name: 'Open', value: filteredTickets.filter(t => t.status === 'OPEN').length, status: 'open' },
@@ -112,7 +107,6 @@ const Reports = () => {
     ].filter(d => d.value > 0);
   }, [filteredTickets]);
 
-  // Chart configs
   const barChartConfig: ChartConfig = {
     open: { label: 'Open', color: 'hsl(var(--primary))' },
     onprogress: { label: 'On Progress', color: 'hsl(45 93% 47%)' },
@@ -136,7 +130,6 @@ const Reports = () => {
   const CATEGORY_COLORS = ['hsl(var(--primary))', 'hsl(45 93% 47%)', 'hsl(262 83% 58%)', 'hsl(174 72% 40%)', 'hsl(340 75% 55%)'];
   const STATUS_COLORS = ['hsl(var(--primary))', 'hsl(45 93% 47%)', 'hsl(25 95% 53%)', 'hsl(262 83% 58%)', 'hsl(142 76% 36%)'];
 
-  // Export to CSV function
   const exportToCSV = (exportType: 'full' | 'summary') => {
     const dateFrom = format(dateRange.from, 'yyyy-MM-dd');
     const dateTo = format(dateRange.to, 'yyyy-MM-dd');
@@ -145,10 +138,8 @@ const Reports = () => {
     let filename = '';
 
     if (exportType === 'full') {
-      // Full ticket data export
       filename = `laporan-tiket-lengkap_${dateFrom}_${dateTo}.csv`;
       
-      // CSV headers
       const headers = [
         'ID Tiket',
         'Provider',
@@ -170,7 +161,6 @@ const Reports = () => {
       
       csvContent = headers.join(',') + '\n';
       
-      // CSV rows
       filteredTickets.forEach(ticket => {
         const row = [
           ticket.id,
@@ -193,10 +183,8 @@ const Reports = () => {
         csvContent += row.join(',') + '\n';
       });
     } else {
-      // Summary export
       filename = `laporan-ringkasan_${dateFrom}_${dateTo}.csv`;
-      
-      // Summary by status
+
       csvContent = 'RINGKASAN LAPORAN TIKET\n';
       csvContent += `Periode: ${format(dateRange.from, 'dd MMM yyyy', { locale: id })} - ${format(dateRange.to, 'dd MMM yyyy', { locale: id })}\n\n`;
       
@@ -220,7 +208,6 @@ const Reports = () => {
       });
     }
 
-    // Create and download file
     const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -238,7 +225,6 @@ const Reports = () => {
     });
   };
 
-  // Preset date ranges
   const handlePresetRange = (days: number) => {
     setDateRange({
       from: subDays(new Date(), days - 1),
@@ -256,7 +242,6 @@ const Reports = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Laporan</h1>
@@ -276,7 +261,6 @@ const Reports = () => {
           </div>
         </div>
 
-        {/* Date Range Filter */}
         <Card className="p-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex items-center gap-2">
@@ -285,7 +269,6 @@ const Reports = () => {
             </div>
             
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Preset buttons */}
               <div className="flex items-center gap-1">
                 <Button
                   variant="outline"
@@ -315,7 +298,6 @@ const Reports = () => {
 
               <div className="h-6 w-px bg-border hidden sm:block" />
 
-              {/* Custom date range pickers */}
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
@@ -383,7 +365,6 @@ const Reports = () => {
               </div>
             </div>
 
-            {/* Summary badge */}
             <div className="ml-auto">
               <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
                 {filteredTickets.length} tiket ditemukan
@@ -392,7 +373,6 @@ const Reports = () => {
           </div>
         </Card>
 
-        {/* Quick Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card className="p-4 text-center">
             <p className="text-2xl font-bold text-primary">
@@ -420,7 +400,6 @@ const Reports = () => {
           </Card>
         </div>
 
-        {/* Charts Row 1: Bar Chart - Tiket per Periode */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -456,17 +435,15 @@ const Reports = () => {
           </CardContent>
         </Card>
 
-        {/* Charts Row 2: Pie Charts */}
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Category Pie Chart */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <PieChart className="w-5 h-5" />
-                Tiket per Kategori
+                Tiket per Saverity
               </CardTitle>
               <CardDescription>
-                Distribusi tiket berdasarkan kategori
+                Distribusi tiket berdasarkan saverity
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -493,7 +470,6 @@ const Reports = () => {
             </CardContent>
           </Card>
 
-          {/* Status Pie Chart */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -529,15 +505,14 @@ const Reports = () => {
           </Card>
         </div>
 
-        {/* Category Breakdown Detail */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
-              Detail per Kategori
+              Detail per Saverity
             </CardTitle>
             <CardDescription>
-              Breakdown tiket berdasarkan kategori dan status
+              Breakdown tiket berdasarkan saverity dan status
             </CardDescription>
           </CardHeader>
           <CardContent>

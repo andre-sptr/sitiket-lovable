@@ -4,7 +4,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 export const TicketDetailSkeleton = () => {
   return (
     <div className="space-y-4 md:space-y-6">
-      {/* Header */}
       <div className="flex items-start gap-3">
         <Skeleton className="h-10 w-10 rounded" />
         <div className="flex-1 min-w-0 space-y-2">
@@ -17,7 +16,6 @@ export const TicketDetailSkeleton = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
       <div className="flex flex-wrap gap-2">
         <Skeleton className="h-9 w-32" />
         <Skeleton className="h-9 w-36" />
@@ -26,9 +24,7 @@ export const TicketDetailSkeleton = () => {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
-        {/* Left Column - Info */}
         <div className="lg:col-span-1 space-y-4">
-          {/* TTR Card */}
           <Card>
             <CardHeader className="pb-2">
               <Skeleton className="h-4 w-20" />
@@ -59,7 +55,6 @@ export const TicketDetailSkeleton = () => {
             </CardContent>
           </Card>
 
-          {/* Location Card */}
           <Card>
             <CardHeader className="pb-2">
               <Skeleton className="h-4 w-16" />
@@ -71,7 +66,6 @@ export const TicketDetailSkeleton = () => {
             </CardContent>
           </Card>
 
-          {/* Assignment Card */}
           <Card>
             <CardHeader className="pb-2">
               <Skeleton className="h-4 w-16" />
@@ -89,9 +83,7 @@ export const TicketDetailSkeleton = () => {
           </Card>
         </div>
 
-        {/* Right Column - Timeline & Update */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Quick Update Form */}
           <Card>
             <CardHeader className="pb-3">
               <Skeleton className="h-5 w-32" />
@@ -106,7 +98,6 @@ export const TicketDetailSkeleton = () => {
             </CardContent>
           </Card>
 
-          {/* Timeline */}
           <Card>
             <CardHeader className="pb-3">
               <Skeleton className="h-5 w-40" />

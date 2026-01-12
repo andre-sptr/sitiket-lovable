@@ -55,17 +55,14 @@ export const Timeline: React.FC<TimelineProps> = ({ updates }) => {
           className="relative pl-8 pb-4 animate-fade-in"
           style={{ animationDelay: `${index * 50}ms` }}
         >
-          {/* Timeline line */}
           {index < sortedUpdates.length - 1 && (
             <div className="absolute left-[11px] top-6 bottom-0 w-0.5 bg-border" />
           )}
           
-          {/* Timeline dot */}
           <div className={`absolute left-0 top-1 w-6 h-6 rounded-full ${getSourceColor(update.source)} flex items-center justify-center text-white shadow-md`}>
             {getSourceIcon(update.source)}
           </div>
 
-          {/* Content */}
           <div className="bg-card border border-border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2">
