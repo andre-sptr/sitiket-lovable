@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { mockUsers } from '@/lib/mockData';
+import { Label } from '@/components/ui/label';
+import { useUsers } from '@/hooks/useUsers';
 import { 
   Users, 
   Plus, 
@@ -16,7 +17,8 @@ import {
   MapPin,
   Edit,
   Trash2,
-  Headphones
+  Headphones,
+  X
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -26,7 +28,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useState } from 'react';
+import { User, UserRole } from '@/types/ticket';
+import { toast } from 'sonner';
 
 const roleIcons = {
   admin: Shield,
@@ -46,11 +75,33 @@ const roleColors = {
   guest: 'bg-gray-100 text-gray-700 border-gray-200',
 };
 
+interface UserFormData {
+  name: string;
+  role: UserRole;
+  phone: string;
+  area: string;
+  isActive: boolean;
+}
+
+const initialFormData: UserFormData = {
+  name: '',
+  role: 'guest',
+  phone: '',
+  area: '',
+  isActive: true,
+};
+
 const UserManagement = () => {
   const { user: currentUser } = useAuth();
+  const { users, addUser, updateUser, deleteUser, toggleUserActive } = useUsers();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [formData, setFormData] = useState<UserFormData>(initialFormData);
 
-  const filteredUsers = mockUsers.filter(user => 
+  const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.area?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -71,6 +122,61 @@ const UserManagement = () => {
     window.location.href = `tel:${phone}`;
   };
 
+  const openAddDialog = () => {
+    setEditingUser(null);
+    setFormData(initialFormData);
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (user: User) => {
+    setEditingUser(user);
+    setFormData({
+      name: user.name,
+      role: user.role,
+      phone: user.phone || '',
+      area: user.area || '',
+      isActive: user.isActive,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const openDeleteDialog = (user: User) => {
+    setUserToDelete(user);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleSubmit = () => {
+    if (!formData.name.trim()) {
+      toast.error('Nama pengguna harus diisi');
+      return;
+    }
+
+    if (editingUser) {
+      updateUser(editingUser.id, formData);
+      toast.success('Pengguna berhasil diperbarui');
+    } else {
+      addUser(formData);
+      toast.success('Pengguna berhasil ditambahkan');
+    }
+    setIsDialogOpen(false);
+    setFormData(initialFormData);
+    setEditingUser(null);
+  };
+
+  const handleDelete = () => {
+    if (userToDelete) {
+      deleteUser(userToDelete.id);
+      toast.success('Pengguna berhasil dihapus');
+      setIsDeleteDialogOpen(false);
+      setUserToDelete(null);
+    }
+  };
+
+  const handleToggleActive = (user: User) => {
+    toggleUserActive(user.id);
+    toast.success(`Pengguna ${user.isActive ? 'dinonaktifkan' : 'diaktifkan'}`);
+  };
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -82,7 +188,7 @@ const UserManagement = () => {
             </p>
           </div>
           {currentUser?.role !== 'guest' && currentUser?.role !== 'hd' && (
-            <Button className="gap-2 self-start">
+            <Button className="gap-2 self-start" onClick={openAddDialog}>
               <Plus className="w-4 h-4" />
               Tambah Pengguna
             </Button>
@@ -100,7 +206,7 @@ const UserManagement = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {Object.entries(usersByRole).map(([role, users]) => {
+          {Object.entries(usersByRole).map(([role, roleUsers]) => {
             const Icon = roleIcons[role as keyof typeof roleIcons];
             return (
               <Card key={role} className="p-4">
@@ -115,7 +221,7 @@ const UserManagement = () => {
                     }`} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{users.length}</p>
+                    <p className="text-2xl font-bold">{roleUsers.length}</p>
                     <p className="text-xs text-muted-foreground">
                       {roleLabels[role as keyof typeof roleLabels]}
                     </p>
@@ -223,15 +329,18 @@ const UserManagement = () => {
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEditDialog(user)}>
                               <Edit className="w-4 h-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleToggleActive(user)}>
                               {user.isActive ? 'Nonaktifkan' : 'Aktifkan'}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem 
+                              className="text-destructive"
+                              onClick={() => openDeleteDialog(user)}
+                            >
                               <Trash2 className="w-4 h-4 mr-2" />
                               Hapus
                             </DropdownMenuItem>
@@ -244,7 +353,7 @@ const UserManagement = () => {
               })}
 
               {filteredUsers.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground col-span-full">
                   <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>Tidak ada pengguna ditemukan</p>
                 </div>
@@ -253,6 +362,115 @@ const UserManagement = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingUser ? 'Edit Pengguna' : 'Tambah Pengguna Baru'}
+            </DialogTitle>
+            <DialogDescription>
+              {editingUser 
+                ? 'Perbarui informasi pengguna di bawah ini.'
+                : 'Isi informasi pengguna baru di bawah ini.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nama *</Label>
+              <Input
+                id="name"
+                placeholder="Masukkan nama pengguna"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="role">Role *</Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value: UserRole) => setFormData(prev => ({ ...prev, role: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      Admin
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="hd">
+                    <div className="flex items-center gap-2">
+                      <Headphones className="w-4 h-4" />
+                      Help Desk
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="guest">
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      Guest
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">No. Telepon</Label>
+              <Input
+                id="phone"
+                placeholder="Contoh: 081234567890"
+                value={formData.phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="area">Area</Label>
+              <Input
+                id="area"
+                placeholder="Contoh: Pekanbaru"
+                value={formData.area}
+                onChange={(e) => setFormData(prev => ({ ...prev, area: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Batal
+            </Button>
+            <Button onClick={handleSubmit}>
+              {editingUser ? 'Simpan Perubahan' : 'Tambah Pengguna'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Pengguna?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus pengguna "{userToDelete?.name}"? 
+              Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
